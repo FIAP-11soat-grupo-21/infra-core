@@ -48,6 +48,10 @@ module "ecs_cluster" {
   private_subnet_ids   = module.vcp.private_subnets
 
   registry_credentials_arn = module.ghcr_secret.secret_arn
+
+  ecs_container_secrets     = merge(var.ecs_container_secrets, {
+    DB_PASSWORD = module.rds_postgres.db_secret_password_arn
+  })
 }
 
 
@@ -74,4 +78,21 @@ module "api_gateway" {
   private_subnet_ids  = module.vcp.private_subnets
   alb_security_group_id = module.alb.alb_security_group_id
   api_name = var.gwapi_name
+}
+
+module "rds_postgres" {
+  source = "../modules/RDS"
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+
+  project_name         = var.project_name
+  db_port              = var.db_port
+  db_allocated_storage = var.db_allocated_storage
+  db_storage_type      = var.db_storage_type
+  db_engine            = var.db_engine
+  db_engine_version    = var.db_engine_version
+  db_instance_class    = var.db_instance_class
+  db_username          = var.db_username
+  private_subnets      = module.vcp.private_subnets
+  vpc_id               = module.vcp.vpc_id
 }

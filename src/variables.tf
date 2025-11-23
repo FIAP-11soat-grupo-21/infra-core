@@ -36,10 +36,10 @@ variable "public_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-variable "ecs_container_port" {
-  description = "Porta exposta pelo container"
-  type        = number
-  default     = 8080
+variable "ecs_container_secrets" {
+  description = "Secrets para o container ECS em formato de mapa"
+  type        = map(string)
+  default     = {}
 }
 
 # Variáveis do Secrets Manager
@@ -65,4 +65,47 @@ variable "gwapi_stage_name" {
     description = "Nome do estágio da API Gateway"
     type        = string
     default     = "prod"
+}
+
+# Variáveis do RDS (adicionadas)
+variable "db_port" {
+  description = "Porta do banco de dados"
+  type        = number
+  default     = 5432
+}
+
+variable "db_allocated_storage" {
+  description = "Tamanho do storage alocado (GB) para a instância RDS"
+  type        = number
+  default     = 20
+}
+
+variable "db_storage_type" {
+  description = "Tipo de storage para RDS (gp2, gp3, io1, padrão: gp2)"
+  type        = string
+  default     = "gp2"
+}
+
+variable "db_engine" {
+  description = "Engine do banco de dados (ex: postgres, mysql)"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_engine_version" {
+  description = "Versão do engine do banco de dados"
+  type        = string
+  default     = "13.7"
+}
+
+variable "db_instance_class" {
+  description = "Classe da instância RDS"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_username" {
+  description = "Nome do usuário administrador do banco"
+  type        = string
+  default     = "postgres"
 }
