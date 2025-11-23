@@ -1,0 +1,129 @@
+name: Terraform Validate Modules
+
+on:
+  push:
+    paths:
+      - '**/*.tf'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - '**/*.tf'
+      - '.github/workflows/**'
+
+jobs:
+  validate:
+    name: Validate changed Terraform modules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Detect changed modules
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "GITHUB_EVENT_NAME=${GITHUB_EVENT_NAME}"
+
+          # Ensure refs are available
+          git fetch --no-tags --prune || true
+
+          # Determine base and head commits
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
+            # fetch base ref if not present
+            git fetch origin "${{ github.event.pull_request.base.ref }}" || true
+            BASE="$BASE_REF"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          HEAD="${GITHUB_SHA}"
+
+          echo "Base: $BASE"
+          echo "Head: $HEAD"
+
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            # No base (initial commit) — consider all files
+            CHANGED=$(git ls-files)
+          else
+            CHANGED=$(git diff --name-only "$BASE...$HEAD" || true)
+          fi
+
+          printf "Changed files:\n%s\n" "$CHANGED"
+
+          # Get directories containing changed .tf or .tfvars files (supports nested dirs)
+          DIRS=$(echo "$CHANGED" | grep -E '\.(tf|tfvars)$' || true | xargs -r -n1 dirname | sort -u)
+
+          # Normalize empty result: if none matched, check if root terraform files were changed
+          if [ -z "$DIRS" ]; then
+            ROOT_TF_CHANGED=$(echo "$CHANGED" | grep -E '^([^/]+\.tf|[^/]+\.tfvars)$' || true)
+            if [ -n "$ROOT_TF_CHANGED" ]; then
+              DIRS="."
+            fi
+          fi
+
+          if [ -z "$DIRS" ]; then
+            echo "No terraform-related changes detected."
+            echo "dirs=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Write newline-separated dirs to GITHUB_OUTPUT
+          echo "dirs<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIRS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Validate changed modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          dirs="${{ steps.detect.outputs.dirs }}"
+
+          if [ -z "$dirs" ]; then
+            echo "No terraform modules to validate; skipping"
+            exit 0
+          fi
+
+          echo "Modules to validate:"
+          echo "$dirs"
+
+          IFS=$'\n'
+          for d in $dirs; do
+            if [ "$d" = "." ]; then
+              workdir="."
+            else
+              workdir="$d"
+            fi
+
+            if [ ! -d "$workdir" ]; then
+              echo "Directory $workdir not found, skipping"
+              continue
+            fi
+
+            echo -e "\n==== Validating $workdir ===="
+            pushd "$workdir"
+
+            # Only run terraform commands if there are .tf files in this dir
+            if ls *.tf > /dev/null 2>&1; then
+              echo "Running terraform fmt check..."
+              terraform fmt -check -diff || (echo "terraform fmt failed in $workdir" && exit 1)
+
+              echo "Initializing terraform (no backend, non-interactive)..."
+              terraform init -backend=false -input=false
+
+              echo "Running terraform validate..."
+              terraform validate
+            else
+              echo "No .tf files in $workdir, skipping terraform validation"
+            fi
+
+            popd
+          done
