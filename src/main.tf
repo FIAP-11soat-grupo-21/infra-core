@@ -7,7 +7,7 @@ locals {
 }
 
 module "application_registry" {
-  source = "./APP-Registry"
+  source = "../modules/APP-Registry"
 
   project_common_tags = local.project_common_tags
 
@@ -16,7 +16,7 @@ module "application_registry" {
 }
 
 module "vcp" {
-  source = "./VPC"
+  source = "../modules/VPC"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
@@ -27,7 +27,7 @@ module "vcp" {
 }
 
 module "rds_postgres" {
-  source = "./RDS"
+  source = "../modules/RDS"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
@@ -44,7 +44,7 @@ module "rds_postgres" {
 }
 
 module "ghcr_secret" {
-  source = "./SM"
+  source = "../modules/SM"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
@@ -54,7 +54,7 @@ module "ghcr_secret" {
 }
 
 module "alb" {
-  source = "./ALB"
+  source = "../modules/ALB"
 
   project_common_tags  = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name         = var.project_name
@@ -67,7 +67,7 @@ module "alb" {
 }
 
 module "ecs_cluster" {
-  source = "./ECS-Cluster"
+  source = "../modules/ECS-Cluster"
 
   depends_on = [module.ghcr_secret]
 
@@ -84,7 +84,7 @@ module "ecs_cluster" {
 }
 
 module "ecs_api" {
-  source = "./ECS-Service"
+  source = "../modules/ECS-Service"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name        = var.project_name
@@ -118,7 +118,7 @@ module "ecs_api" {
 }
 
 module "alb_sonarqube" {
-  source = "./ALB"
+  source = "../modules/ALB"
 
   project_common_tags  = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name         = var.project_name
@@ -131,7 +131,7 @@ module "alb_sonarqube" {
 }
 
 module "ecs_sonarqube" {
-  source = "./ECS-Service"
+  source = "../modules/ECS-Service"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name        = var.project_name
@@ -158,7 +158,7 @@ module "ecs_sonarqube" {
 }
 
 module "api_gateway" {
-  source = "./API-Gateway"
+  source = "../modules/API-Gateway"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name        = var.project_name
@@ -169,7 +169,7 @@ module "api_gateway" {
 }
 
 module "api_gateway_routes" {
-  source = "./API-Gateway-Routes"
+  source = "../modules/API-Gateway-Routes"
 
   api_id = module.api_gateway.api_id
   vpc_link_id = module.api_gateway.vpc_link_id
@@ -184,7 +184,7 @@ module "api_gateway_routes" {
 }
 
 module "dynamo" {
-  source = "./Dynamo"
+  source = "../modules/Dynamo"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name = var.project_name

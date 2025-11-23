@@ -38,7 +38,7 @@ Cria uma função AWS Lambda empacotada a partir de um diretório de código, co
 module "lambda_example" {
   source = "../Lambda"
   lambda_name = "my-fn"
-  source_path = "../src/my-fn"
+  source_path = "../modules/my-fn"
   handler = "app.handler"
   runtime = "python3.9"
   subnet_ids = module.vcp.private_subnets
