@@ -1,5 +1,27 @@
 data "aws_region" "current" {}
 
+// assume role policy para task role criada internamente
+data "aws_iam_policy_document" "ecs_task_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_task_role" {
+  count = var.task_role_arn == "" ? 1 : 0
+
+  name               = "${var.ecs_service_name}-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume.json
+
+  tags = merge(var.project_common_tags, {
+    Name = "${var.ecs_service_name}-task-role"
+  })
+}
+
 locals {
   ecs_environment = [ for key, value in var.ecs_container_environment_variables : {
     name  = key
@@ -43,12 +65,13 @@ locals {
 }
 
 resource "aws_ecs_task_definition" "tasks" {
-  family = "service"
+  family                   = "service"
   requires_compatibilities = ["FARGATE"]
-  network_mode = var.ecs_network_mode
-  cpu = var.ecs_task_cpu
-  memory = var.ecs_task_memory
-  execution_role_arn = var.task_execution_role_arn
+  network_mode              = var.ecs_network_mode
+  cpu                       = var.ecs_task_cpu
+  memory                    = var.ecs_task_memory
+  execution_role_arn        = var.task_execution_role_arn
+  task_role_arn             = var.task_role_arn != "" ? var.task_role_arn : (length(aws_iam_role.ecs_task_role) > 0 ? aws_iam_role.ecs_task_role[0].arn : null)
 
   container_definitions = jsonencode([
     local.container_def_map

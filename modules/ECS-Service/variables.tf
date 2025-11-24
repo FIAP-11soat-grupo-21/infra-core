@@ -1,7 +1,3 @@
-variable "project_name" {
-  type = string
-}
-
 variable "project_common_tags" {
   type = map(string)
   default = {}
@@ -17,6 +13,12 @@ variable "ecs_security_group_id" {
 
 variable "task_execution_role_arn" {
   type = string
+}
+
+variable "task_role_arn" {
+  type    = string
+  default = ""
+  description = "(Opcional) ARN da task role que será atribuída aos containers (permite chamadas AWS a partir do app)."
 }
 
 variable "cloudwatch_log_group" {
@@ -87,4 +89,3 @@ variable "alb_security_group_id" {
   type = string
   default = ""
 }
-
