@@ -74,7 +74,6 @@ module "api_gateway" {
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
   project_name        = var.project_name
-
   private_subnet_ids  = module.vcp.private_subnets
   alb_security_group_id = module.alb.alb_security_group_id
   api_name = var.gwapi_name
