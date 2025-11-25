@@ -54,7 +54,7 @@ jobs:
       - name: Load tfvars
         working-directory: src
         run: |
-          echo ${{ secrets.TERRAFORM_VALUES }} > values.tfvars
+          echo ${{ secrets.TERRAFORM_VALUES }} >> values.tfvars
 
       - name: Terraform Plan
         working-directory: src
