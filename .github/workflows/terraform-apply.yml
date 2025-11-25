@@ -24,6 +24,8 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION }}
       AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
       GIT_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
 
     steps:
       - name: Checkout repository
@@ -54,7 +56,8 @@ jobs:
       - name: Load tfvars
         working-directory: src
         run: |
-          printf '%s\n' "${{ secrets.TERRAFORM_VALUES }}" > values.tfvars
+          sed -ie "s|GHCR_USERNAME|${{ env.GHCR_USERNAME }}|g" values.tfvars
+          sed -ie "s|GHCR_TOKEN|${{ env.GHCR_TOKEN }}|g" values.tfvars
 
       - name: Terraform Plan
         working-directory: src
