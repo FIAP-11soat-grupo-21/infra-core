@@ -1,0 +1,66 @@
+name: Terraform - Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      auto_approve:
+        description: "Se true, destrói com -auto-approve (necessário para execução no CI)"
+        required: false
+        default: "false"
+      terraform_version:
+        description: "Versão do Terraform a usar"
+        required: false
+        default: "1.5.0"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-destroy:
+    name: Terraform Destroy (infra)
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      GIT_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ github.event.inputs.terraform_version }}
+
+      - name: Setup SSH agent for git
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ env.GIT_SSH_KEY }}
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0
+        with:
+          role-to-assume:  ${{ env.AWS_ROLE_ARN }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: src
+        run: |
+          terraform init -input=false
+
+      - name: Terraform Destroy
+        working-directory: src
+        run: |
+          if [ "${{ github.event.inputs.auto_approve }}" = "true" ]; then
+            terraform destroy -input=false -var-file=values.tfvars -auto-approve
+          else
+            echo "auto_approve is false. To run destroy non-interactively set workflow input 'auto_approve' to 'true'. Aborting.";
+            exit 1
+          fi
+
+      - name: Done
+        run: echo "Terraform destroy finished."
+
