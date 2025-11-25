@@ -51,6 +51,16 @@ jobs:
         run: |
           terraform init -input=false
 
+      - name: Load tfvars
+        working-directory: src
+        run: |
+          echo ${{ secrets.TERRAFORM_VALUES }} > values.tfvars
+
+      - name: Terraform Plan
+        working-directory: src
+        run: |
+          terraform plan -input=false -var-file=values.tfvars
+
       - name: Terraform Destroy
         working-directory: src
         run: |

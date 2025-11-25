@@ -1,6 +1,5 @@
 data "aws_region" "current" {}
 
-// assume role policy para task role criada internamente
 data "aws_iam_policy_document" "ecs_task_assume" {
   statement {
     actions = ["sts:AssumeRole"]
