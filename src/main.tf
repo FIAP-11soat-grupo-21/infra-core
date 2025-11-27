@@ -59,7 +59,6 @@ module "alb" {
   source = "../modules/ALB"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
-  project_name        = var.project_name
 
   vpc_id             = module.vcp.vpc_id
   private_subnet_ids = module.vcp.private_subnets
