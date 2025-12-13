@@ -28,6 +28,11 @@ output "vpc_id" {
   value       = module.vcp.vpc_id
 }
 
+output "vpc_cdir_block" {
+  description = "VPC id"
+  value       = module.vcp.cdir_block
+}
+
 output "private_subnet_id" {
   description = "ID da subnet privada (retorna a lista para compatibilidade)"
   value = module.vcp.private_subnets
