@@ -89,3 +89,10 @@ variable "alb_security_group_id" {
   type = string
   default = ""
 }
+
+# Lista de ARNs de policies para anexar à task role (criadas pelo módulo ou fornecida via task_role_arn)
+variable "task_role_policy_arns" {
+  type        = list(string)
+  default     = []
+  description = "(Opcional) Lista de ARNs de IAM policies para anexar à task role usada pelos containers."
+}

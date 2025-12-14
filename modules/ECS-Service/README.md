@@ -27,6 +27,7 @@ Cria uma task definition e um serviço ECS que roda containers; integra-se com A
 | ecs_service_name | string | Não | Nome do serviço ECS |
 | alb_target_group_arn | string | Não | ARN do target group do ALB para registrar as tasks |
 | alb_security_group_id | string | Não | ID do SG do ALB (para configurar regras) |
+| task_role_policy_arns | list(string) | Não | Lista de ARNs de policies para anexar à task role (criada pelo módulo ou fornecida) |
 
 ## Saídas (outputs)
 
@@ -118,3 +119,20 @@ resource "aws_iam_role_policy_attachment" "attach_dynamo_to_ecs_role" {
 
 - Verifique a configuração de security groups entre ALB e tasks para permitir tráfego na porta correta.
 - Se desejar auto-scaling ou integração com Service Discovery, expanda este módulo conforme necessário.
+
+### Exemplo: passando permissões via parâmetro
+
+Se você quiser anexar permissões direto via parâmetro, forneça `task_role_policy_arns` com a lista de ARNs:
+
+```
+module "ecs" {
+  source = "./modules/ECS-Service"
+  # ...inputs obrigatórios...
+  task_role_arn = aws_iam_role.ecs_task_role.arn # opcional; se não informado, o módulo cria
+
+  task_role_policy_arns = [
+    module.dynamo.policy_arn,
+    "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
+  ]
+}
+```

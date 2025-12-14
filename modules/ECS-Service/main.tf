@@ -21,6 +21,18 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
+# Nome da role a ser usada (criada internamente ou fornecida por ARN)
+locals {
+  ecs_task_role_name = var.task_role_arn != "" ? split("/", var.task_role_arn)[1] : (length(aws_iam_role.ecs_task_role) > 0 ? aws_iam_role.ecs_task_role[0].name : null)
+}
+
+# Anexar policies fornecidas via parâmetro à task role
+resource "aws_iam_role_policy_attachment" "ecs_task_role_attachments" {
+  count      = local.ecs_task_role_name != null ? length(var.task_role_policy_arns) : 0
+  role       = local.ecs_task_role_name
+  policy_arn = var.task_role_policy_arns[count.index]
+}
+
 locals {
   ecs_environment = [ for key, value in var.ecs_container_environment_variables : {
     name  = key
