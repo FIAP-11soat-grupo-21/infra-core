@@ -32,44 +32,17 @@ variable "subnet_ids" {
   }
 }
 
-variable "security_group_ids" {
-  type = list(string)
-  description = "Security group IDs for Lambda function (required for VPC access)."
-
-  validation {
-    condition     = length(var.security_group_ids) > 0
-    error_message = "At least one security group ID must be provided so the Lambda function has network access in the VPC."
-  }
-}
-
-variable "api_id" {
-  type    = string
-  default = ""
-  description = "apigatewayv2 API id where route/integration will be created (optional)."
-}
-
-variable "route_key" {
-  type    = string
-  default = ""
-  description = "API route key, e.g. \"GET /path\" or \"$default\" (optional)."
-}
-
-variable "secrets_arn" {
-  type    = string
-  default = null
-}
-
-variable "allow_dynamodb_access" {
-  type    = bool
-  default = false
-}
-
-variable "dynamo_table_arn" {
-  type    = string
-  default = null
-}
-
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID where the Lambda security group will be created."
+
+  validation {
+    condition     = length(var.vpc_id) > 0
+    error_message = "You must provide a valid VPC ID for creating the Lambda security group."
+  }
 }

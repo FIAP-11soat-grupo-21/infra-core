@@ -3,7 +3,7 @@ data "aws_region" "current" {}
 data "aws_prefix_list" "s3"{
     filter {
       name = "prefix-list-name"
-      values = ["com.amazonaws.${data.aws_region.current.region}.s3"]
+      values = ["com.amazonaws.${data.aws_region.current.name}.s3"]
     }
 }
 
@@ -56,7 +56,7 @@ resource "aws_db_instance" "database" {
   db_subnet_group_name = aws_db_subnet_group.rds.name
 
   tags = merge(var.project_common_tags, {
-    Name = "${var.project_name}-${var.db_engine}-db"
+    Name = "${var.db_engine}-db"
   })
 }
 
@@ -73,7 +73,7 @@ resource "random_id" "secret_suffix" {
 # Criar secret no secret manager
 resource "aws_secretsmanager_secret" "db_credentials" {
     name = "${var.db_engine}-${random_id.secret_suffix.hex}-db-password"
-    description = "Senha do banco de dados ${var.db_engine} para o projeto ${var.project_name}"
+    description = "Senha do banco de dados ${var.db_engine}."
     tags = var.project_common_tags
 }
 

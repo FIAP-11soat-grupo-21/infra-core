@@ -16,6 +16,15 @@ Cria rotas e integrações para a API Gateway (HTTP API v2). Este módulo assume
 | stage_name | string | Não | Nome do estágio |
 | project_common_tags | map(string) | Não | Tags comuns do projeto |
 | api_gw_logs_arn | string | Não | ARN do log group da API |
+| jwt_authorizer_enabled | bool | Não | Habilita a criação de um Authorizer JWT |
+| jwt_authorizer_name | string | Não | Nome do authorizer JWT |
+| jwt_issuer | string | Cond. | Issuer do JWT (ex: https://cognito-idp.{region}.amazonaws.com/{userPoolId} ou provedor OIDC) |
+| jwt_audiences | list(string) | Cond. | Lista de audiences válidas |
+| jwt_identity_sources | list(string) | Não | Fontes de identidade (padrão: "$request.header.Authorization") |
+| restricted_route_key | string | Não | Rota opcional que exigirá JWT (ex: "GET /restricted") |
+
+Notas:
+- `jwt_issuer` e `jwt_audiences` são obrigatórios quando `jwt_authorizer_enabled = true`.
 
 ## Saídas (outputs)
 
@@ -27,15 +36,25 @@ Cria rotas e integrações para a API Gateway (HTTP API v2). Este módulo assume
 
 ```hcl
 module "api_gateway_routes" {
-  source = "../API-Gateway-Routes"
-  api_id = module.api_gateway.api_id
-  vpc_link_id = module.api_gateway.vpc_link_id
-  alb_listener_arn = module.alb.listener_arn
-  gwapi_route_key = var.gwapi_route_key
-  gwapi_auto_deploy = var.gwapi_auto_deploy
-  stage_name = var.gwapi_stage_name
+  source            = "../API-Gateway-Routes"
+  api_id            = module.api_gateway.api_id
+  vpc_link_id       = module.api_gateway.vpc_link_id
+  alb_listener_arn  = module.alb.listener_arn
+  gwapi_route_key   = "ANY /{proxy+}"
+  gwapi_auto_deploy = true
+  stage_name        = "$default"
+
+  # Configuração opcional de rota protegida por JWT
+  jwt_authorizer_enabled = true
+  jwt_authorizer_name    = "jwt-auth"
+  jwt_issuer             = var.jwt_issuer
+  jwt_audiences          = ["my-api"]
+  jwt_identity_sources   = ["$request.header.Authorization"]
+
+  # Rota que exigirá JWT
+  restricted_route_key = "GET /restricted"
 }
 ```
 
 ## Notas
-- O módulo cria rotas do tipo HTTP->ALB ou HTTP->Lambda dependendo das entradas.
+- O módulo cria rotas do tipo HTTP->ALB. Quando habilitado, adiciona um authorizer JWT e uma rota adicional protegida por ele.
