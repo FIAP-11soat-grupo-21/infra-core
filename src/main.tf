@@ -83,7 +83,6 @@ module "rds_postgres" {
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
-  project_name         = var.project_name
   db_port              = var.db_port
   db_allocated_storage = var.db_allocated_storage
   db_storage_type      = var.db_storage_type
