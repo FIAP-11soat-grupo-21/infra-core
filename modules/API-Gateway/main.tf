@@ -18,3 +18,4 @@ resource "aws_cloudwatch_log_group" "api_gw_logs" {
   retention_in_days = 14
   tags = var.project_common_tags
 }
+

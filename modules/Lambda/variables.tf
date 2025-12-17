@@ -46,3 +46,45 @@ variable "vpc_id" {
     error_message = "You must provide a valid VPC ID for creating the Lambda security group."
   }
 }
+
+variable "layer_enabled" {
+  description = "Enable creation and attachment of a Lambda Layer"
+  type        = bool
+  default     = false
+}
+
+variable "layer_source_path" {
+  description = "Path to the layer source directory to be zipped (folder content will be the layer content)"
+  type        = string
+  default     = ""
+}
+
+variable "layer_name" {
+  description = "Name for the Lambda Layer"
+  type        = string
+  default     = ""
+}
+
+variable "layer_compatible_runtimes" {
+  description = "List of runtimes compatible with the layer"
+  type        = list(string)
+  default     = []
+}
+
+variable "layer_compatible_architectures" {
+  description = "List of architectures compatible with the layer (e.g. x86_64, arm64)"
+  type        = list(string)
+  default     = []
+}
+
+variable "layer_description" {
+  description = "Optional description for the layer"
+  type        = string
+  default     = ""
+}
+
+variable "layer_license_info" {
+  description = "Optional license info for the layer"
+  type        = string
+  default     = ""
+}

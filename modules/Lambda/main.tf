@@ -26,6 +26,23 @@ resource "aws_iam_role_policy_attachment" "vpc_access" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+data "archive_file" "layer_zip" {
+  count       = var.layer_enabled ? 1 : 0
+  type        = "zip"
+  source_dir  = var.layer_source_path
+  output_path = "${path.module}/${var.layer_name}.zip"
+}
+
+resource "aws_lambda_layer_version" "this" {
+  count                     = var.layer_enabled ? 1 : 0
+  filename                  = data.archive_file.layer_zip[0].output_path
+  layer_name                = var.layer_name
+  compatible_runtimes       = var.layer_compatible_runtimes
+  compatible_architectures  = var.layer_compatible_architectures
+  description               = var.layer_description
+  license_info              = var.layer_license_info
+}
+
 resource "aws_lambda_function" "this" {
   filename         = data.archive_file.lambda_zip.output_path
   function_name    = var.lambda_name
@@ -43,10 +60,11 @@ resource "aws_lambda_function" "this" {
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
 
+  layers = var.layer_enabled ? [aws_lambda_layer_version.this[0].arn] : []
+
   tags    = var.tags
   publish = true
 }
-
 
 resource "aws_security_group" "lambda_sg" {
   name        = "${var.lambda_name}-sg"
