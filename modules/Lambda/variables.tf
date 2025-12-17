@@ -88,3 +88,21 @@ variable "layer_license_info" {
   type        = string
   default     = ""
 }
+
+variable "s3_bucket" {
+  type        = string
+  description = "S3 bucket containing the Lambda deployment package (required when using S3)."
+  default     = ""
+}
+
+variable "s3_key" {
+  type        = string
+  description = "S3 key (object path) to the Lambda zip file."
+  default     = ""
+}
+
+variable "s3_object_version" {
+  type        = string
+  description = "Optional S3 object version for the Lambda package (leave empty if not used)."
+  default     = ""
+}

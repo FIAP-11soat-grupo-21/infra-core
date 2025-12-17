@@ -1,9 +1,3 @@
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = var.source_path
-  output_path = "${path.module}/${var.lambda_name}.zip"
-}
-
 resource "aws_iam_role" "lambda_exec" {
   name = "${var.lambda_name}-exec-role"
   assume_role_policy = jsonencode({
@@ -44,12 +38,15 @@ resource "aws_lambda_layer_version" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  filename         = data.archive_file.lambda_zip.output_path
+  # Usar código armazenado no S3 (ao invés de arquivo zip local)
   function_name    = var.lambda_name
   role             = aws_iam_role.lambda_exec.arn
   handler          = var.handler
   runtime          = var.runtime
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  s3_bucket = var.s3_bucket
+  s3_key    = var.s3_key
+  # Opcional: s3_object_version = var.s3_object_version
 
   environment {
     variables = var.environment
