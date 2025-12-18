@@ -30,7 +30,7 @@ resource "aws_apigatewayv2_integration" "lambda" {
 resource "aws_apigatewayv2_route" "lambda_route" {
   api_id    = var.api_id
   route_key = var.route_key
-  target    = "integrations/${aws_apigatewayv2_integration.lambda[0].id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 
   depends_on = [aws_apigatewayv2_integration.lambda]
 }
