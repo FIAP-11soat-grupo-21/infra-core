@@ -78,3 +78,4 @@ resource "aws_security_group" "lambda_sg" {
 
   tags = var.tags
 }
+

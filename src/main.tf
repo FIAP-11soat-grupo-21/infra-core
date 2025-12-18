@@ -93,3 +93,9 @@ module "rds_postgres" {
   private_subnets      = module.vcp.private_subnets
   vpc_id               = module.vcp.vpc_id
 }
+
+module "function_bucket" {
+  source = "../modules/S3"
+
+  bucket_name = "${var.project_name}-function-bucket"
+}
