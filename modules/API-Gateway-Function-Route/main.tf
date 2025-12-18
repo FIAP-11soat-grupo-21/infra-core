@@ -14,7 +14,7 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = local.create_integration ? "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.api_id}/*/*/*" : null
+  source_arn    = "${var.api_id}/*/*"
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
@@ -34,4 +34,3 @@ resource "aws_apigatewayv2_route" "lambda_route" {
 
   depends_on = [aws_apigatewayv2_integration.lambda]
 }
-
