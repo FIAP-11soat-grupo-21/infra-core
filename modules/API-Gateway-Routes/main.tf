@@ -51,10 +51,10 @@ resource "aws_apigatewayv2_deployment" "api_deployment" {
     try(aws_apigatewayv2_route.restricted[0].id, ""),
   ]))
 
-  depends_on = concat([
+  depends_on = [
     aws_apigatewayv2_integration.alb_proxy,
     aws_apigatewayv2_route.proxy,
-  ], aws_apigatewayv2_authorizer.jwt, aws_apigatewayv2_route.restricted)
+  ]
 
   lifecycle {
     create_before_destroy = true
