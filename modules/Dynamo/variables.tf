@@ -24,13 +24,11 @@ variable "hash_key_type" {
 }
 
 variable "range_key" {
-  type    = string
-  default = ""
-}
-
-variable "range_key_type" {
-  type    = string
-  default = "S"
+  type    = list(object({
+    name = string,
+    type = string}
+  ))
+  default = []
 }
 
 variable "read_capacity" {
@@ -105,7 +103,8 @@ variable "project_common_tags" {
   default = {}
 }
 
-variable "project_name" {
-  type    = string
-  default = ""
+variable "secondary_indexes" {
+  type = list(map(string))
+  default = [{}]
+  description = "List of secondary indexes to create on the DynamoDB table."
 }

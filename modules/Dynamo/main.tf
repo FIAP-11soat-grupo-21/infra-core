@@ -9,23 +9,27 @@ resource "aws_dynamodb_table" "this" {
   billing_mode = var.billing_mode
   hash_key     = var.hash_key
 
-  dynamic "attribute" {
-    for_each = [var.hash_key]
+  dynamic "global_secondary_index" {
+    for_each = var.secondary_indexes
     content {
-      name = var.hash_key
-      type = var.hash_key_type
+      name            = global_secondary_index.value.name
+      hash_key        = global_secondary_index.value.hash_key
+      projection_type = global_secondary_index.value.projection_type
     }
   }
 
   dynamic "attribute" {
-    for_each = var.range_key != "" ? [var.range_key] : []
+    for_each = var.range_key
     content {
-      name = var.range_key
-      type = var.range_key_type
+      name = attribute.value.name
+      type = attribute.value.type
     }
   }
 
-  range_key = var.range_key != "" ? var.range_key : null
+  attribute {
+    name = var.hash_key
+    type = var.hash_key_type
+  }
 
   // throughput only set when using PROVISIONED
   read_capacity  = var.billing_mode == "PROVISIONED" ? var.read_capacity : null
