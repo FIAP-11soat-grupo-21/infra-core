@@ -19,3 +19,33 @@ resource "aws_cloudwatch_log_group" "api_gw_logs" {
   tags = var.project_common_tags
 }
 
+resource "aws_apigatewayv2_stage" "default" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  name        = var.stage_name
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw_logs.arn
+    format = jsonencode({
+      requestId = "$context.requestId",
+      ip = "$context.identity.sourceIp",
+      caller = "$context.identity.caller",
+      user = "$context.identity.user",
+      requestTime = "$context.requestTime",
+      httpMethod = "$context.httpMethod",
+      routeKey = "$context.routeKey",
+      status = "$context.status",
+      protocol = "$context.protocol",
+      responseLatency = "$context.responseLatency"
+    })
+  }
+
+  default_route_settings {
+    logging_level = "INFO"
+    data_trace_enabled = true
+    detailed_metrics_enabled = true
+    throttling_burst_limit = 200
+    throttling_rate_limit  = 1000
+  }
+
+  auto_deploy = var.gwapi_auto_deploy
+}

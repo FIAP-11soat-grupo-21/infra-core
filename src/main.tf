@@ -72,4 +72,6 @@ module "api_gateway" {
   private_subnet_ids  = module.vcp.private_subnets
   alb_security_group_id = module.alb.alb_security_group_id
   api_name = var.gwapi_name
+  gwapi_auto_deploy = true
+  stage_name = "v1"
 }

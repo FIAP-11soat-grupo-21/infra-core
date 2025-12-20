@@ -24,3 +24,11 @@ variable "alb_security_group_id" {
   description = "ID do security group usado para permitir tráfego entre o VPC Link e o ALB"
   type        = string
 }
+
+variable "gwapi_auto_deploy" {
+  type = bool
+}
+
+variable "stage_name" {
+  type = string
+}

@@ -28,4 +28,3 @@ db_storage_type      = "gp2"
 db_engine_version    = "18"
 db_instance_class    = "db.t3.micro"
 db_username          = "adminuser"
-

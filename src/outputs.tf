@@ -72,11 +72,6 @@ output "api_gateway_vpc_link_id" {
   value       = module.api_gateway.vpc_link_id
 }
 
-output "api_gateway_logs_arn" {
-  description = "ARN do CloudWatch Log Group da API Gateway"
-  value       = module.api_gateway.api_gw_logs_arn
-}
-
 output "api_gateway_stage_name" {
   description = "Nome do estágio da API Gateway (configurado via gwapi_stage_name)"
   value       = var.gwapi_stage_name

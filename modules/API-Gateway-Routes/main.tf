@@ -61,34 +61,3 @@ resource "aws_apigatewayv2_deployment" "api_deployment" {
   }
 }
 
-resource "aws_apigatewayv2_stage" "default" {
-  api_id      = var.api_id
-  name        = var.stage_name
-
-  access_log_settings {
-    destination_arn = var.api_gw_logs_arn
-    format = jsonencode({
-      requestId = "$context.requestId",
-      ip = "$context.identity.sourceIp",
-      caller = "$context.identity.caller",
-      user = "$context.identity.user",
-      requestTime = "$context.requestTime",
-      httpMethod = "$context.httpMethod",
-      routeKey = "$context.routeKey",
-      status = "$context.status",
-      protocol = "$context.protocol",
-      responseLatency = "$context.responseLatency"
-    })
-  }
-
-  default_route_settings {
-    logging_level = "INFO"
-    data_trace_enabled = true
-    detailed_metrics_enabled = true
-    throttling_burst_limit = 200
-    throttling_rate_limit  = 1000
-  }
-
-  auto_deploy = var.gwapi_auto_deploy
-  deployment_id = var.gwapi_auto_deploy ? null : (var.stage_name == "$default" ? null : aws_apigatewayv2_deployment.api_deployment.id)
-}

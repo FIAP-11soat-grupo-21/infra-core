@@ -12,8 +12,3 @@ output "vpc_link_id" {
   description = "ID do VPC Link criado"
   value       = aws_apigatewayv2_vpc_link.vpc_link.id
 }
-
-output "api_gw_logs_arn" {
-  description = "ARN do CloudWatch Log Group da API Gateway"
-  value       = aws_cloudwatch_log_group.api_gw_logs.arn
-}
