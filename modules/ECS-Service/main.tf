@@ -76,7 +76,7 @@ locals {
 }
 
 resource "aws_ecs_task_definition" "tasks" {
-  family                   = "service"
+  family                   = "${var.ecs_service_name}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode              = var.ecs_network_mode
   cpu                       = var.ecs_task_cpu
