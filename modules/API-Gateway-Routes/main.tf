@@ -1,19 +1,7 @@
-resource "aws_apigatewayv2_integration" "alb_proxy" {
-  api_id                 = var.api_id
-  integration_type       = "HTTP_PROXY"
-
-  integration_uri        = var.alb_listener_arn
-  integration_method     = "ANY"
-  payload_format_version = "1.0"
-
-  connection_type = "VPC_LINK"
-  connection_id   = var.vpc_link_id
-}
-
 resource "aws_apigatewayv2_route" "proxy" {
   api_id   = var.api_id
   route_key = var.gwapi_route_key
-  target    = "integrations/${aws_apigatewayv2_integration.alb_proxy.id}"
+  target    = "integrations/${var.alb_proxy_id}"
 }
 
 resource "aws_apigatewayv2_authorizer" "jwt" {
@@ -35,7 +23,7 @@ resource "aws_apigatewayv2_route" "restricted" {
 
   api_id    = var.api_id
   route_key = var.restricted_route_key
-  target    = "integrations/${aws_apigatewayv2_integration.alb_proxy.id}"
+  target    = "integrations/${var.alb_proxy_id}"
 
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.jwt[0].id
@@ -45,14 +33,13 @@ resource "aws_apigatewayv2_deployment" "api_deployment" {
   api_id = var.api_id
 
   description = sha256(join("-", [
-    aws_apigatewayv2_integration.alb_proxy.id,
+    var.alb_proxy_id,
     aws_apigatewayv2_route.proxy.id,
     try(aws_apigatewayv2_authorizer.jwt[0].id, ""),
     try(aws_apigatewayv2_route.restricted[0].id, ""),
   ]))
 
   depends_on = [
-    aws_apigatewayv2_integration.alb_proxy,
     aws_apigatewayv2_route.proxy,
   ]
 

@@ -1,6 +1,3 @@
-// Module: API-Gateway-Function-Route
-// Creates an AWS API Gateway v2 integration and route for invoking a Lambda function
-
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}

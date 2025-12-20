@@ -1,7 +1,5 @@
 // filepath: c:\Users\mateu\GolandProjects\infra\API-Gateway-Routes\variables.tf
 variable "api_id" { type = string }
-variable "vpc_link_id" { type = string }
-variable "alb_listener_arn" { type = string }
 variable "gwapi_route_key" { type = string }
 
 // Optional JWT authorizer and restricted route
@@ -34,4 +32,9 @@ variable "restricted_route_key" {
   description = "Opcional: rota que exigirá JWT (ex: 'GET /restricted' ou 'ANY /secure/{proxy+}')"
   type        = string
   default     = null
+}
+
+variable "alb_proxy_id" {
+  type = string
+  description = "Id do proxy de integração do ALB criado no módulo ALB-API-Gateway"
 }
