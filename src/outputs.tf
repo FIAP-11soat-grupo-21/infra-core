@@ -87,16 +87,6 @@ output "cloudwatch_log_group" {
   value = module.ecs_cluster.cloudwatch_log_group
 }
 
-output "rds_postgres_db_secret_password_arn" {
-  description = "ARN do secret version com a senha do RDS (do módulo rds_postgres)"
-  value       = module.rds_postgres.db_secret_password_arn
-}
-
-output "rds_postgres_db_connection" {
-  description = "Endpoint/endpoint address do RDS (do módulo rds_postgres)"
-  value       = module.rds_postgres.db_connection
-}
-
 output "rds_postgres_db_username" {
   description = "Usuário do banco de dados (configurado via variável db_username)"
   value       = var.db_username
@@ -105,14 +95,4 @@ output "rds_postgres_db_username" {
 output "ecr_registry_credentials_arn" {
   description = "Credencial do GHCR"
   value = module.ghcr_secret.secret_arn
-}
-
-output "s3_bucket_id" {
-  description = "Id do bucket S3 usado para armazenar código das funções Lambda"
-  value = module.function_bucket.bucket_id
-}
-
-output "s3_bucket_name" {
-  description = "Nome do bucket S3 usado para armazenar código das funções Lambda"
-  value = module.function_bucket.bucket_name
 }

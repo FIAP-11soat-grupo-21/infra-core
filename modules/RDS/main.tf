@@ -19,8 +19,8 @@ resource "aws_db_subnet_group" "rds" {
 
 # Configuração da regra
 resource "aws_security_group" "rds_allow_app" {
-  name  = "${var.db_engine}-rds-allow-app"
-  description = "Allow access to RDS from application servers"
+  name  = "${var.db_engine}-rds-allow-${var.app_name}"
+  description = "Allow access to RDS from ${var.app_name}"
   vpc_id = var.vpc_id
 
   ingress {
@@ -42,7 +42,7 @@ resource "aws_security_group" "rds_allow_app" {
 resource "aws_db_instance" "database" {
   depends_on = [random_password.db_password]
 
-  identifier           = var.db_engine
+  identifier           = "${var.db_engine}-${var.app_name}"
   allocated_storage    = var.db_allocated_storage
   storage_type         = var.db_storage_type
   engine               = var.db_engine
@@ -56,7 +56,7 @@ resource "aws_db_instance" "database" {
   db_subnet_group_name = aws_db_subnet_group.rds.name
 
   tags = merge(var.project_common_tags, {
-    Name = "${var.db_engine}-db"
+    Name = "${var.db_engine}-${var.app_name}-db"
   })
 }
 

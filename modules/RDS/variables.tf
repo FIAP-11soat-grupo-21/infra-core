@@ -49,3 +49,8 @@ variable "vpc_id" {
     description = "ID da VPC existente (se aplicável)"
     type        = string
 }
+
+variable "app_name" {
+    description = "Nome da aplicação que irá acessar o RDS"
+    type        = string
+}
