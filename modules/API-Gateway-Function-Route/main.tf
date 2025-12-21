@@ -1,3 +1,11 @@
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
+locals {
+  create_integration = var.api_id != "" && var.lambda_arn != "" && var.route_key != ""
+}
+
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke-${var.lambda_name != "" ? var.lambda_name : substr(md5(var.lambda_arn),0,8)}"
   action        = "lambda:InvokeFunction"
@@ -6,26 +14,20 @@ resource "aws_lambda_permission" "apigw" {
   source_arn    = "${var.api_gateway_arn}/*/*"
 }
 
+resource "aws_apigatewayv2_integration" "lambda" {
+  api_id                 = var.api_id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.lambda_arn}/invocations"
+  integration_method     = "POST"
+  payload_format_version = var.payload_format_version
+
+  depends_on = [aws_lambda_permission.apigw]
+}
+
 resource "aws_apigatewayv2_route" "lambda_route" {
   api_id    = var.api_id
   route_key = var.route_key
-  target    = "integrations/${var.lambda_integration_id}"
-}
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 
-resource "aws_apigatewayv2_route" "proxy" {
-  api_id   = var.api_id
-  route_key = var.gwapi_route_key
-  target    = "integrations/${var.alb_proxy_id}"
-}
-
-resource "aws_apigatewayv2_deployment" "api_deployment" {
-  api_id = var.api_id
-
-  depends_on = [
-    aws_apigatewayv2_route.proxy,
-  ]
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  depends_on = [aws_apigatewayv2_integration.lambda]
 }

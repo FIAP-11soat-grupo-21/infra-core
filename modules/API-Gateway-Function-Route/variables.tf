@@ -22,6 +22,12 @@ variable "lambda_name" {
   default = ""
 }
 
+variable "payload_format_version" {
+  description = "Payload format version for the integration"
+  type = string
+  default = "2.0"
+}
+
 variable "project_common_tags" {
   type = map(string)
   default = {}
@@ -30,18 +36,4 @@ variable "api_gateway_arn" {
   description = "ARN of the API Gateway"
   type = string
   default = ""
-}
-variable "alb_proxy_id" {
-  type        = string
-  description = "Id do proxy de integração do ALB criado no módulo ALB-API-Gateway"
-}
-
-variable "gwapi_route_key" {
-  description = "Route key for the ALB proxy route (e.g. 'GET /{proxy+}' or 'ANY /{proxy+}')"
-  type = string
-}
-
-variable "lambda_integration_id" {
-    description = "Integration ID for the Lambda function"
-    type = string
 }

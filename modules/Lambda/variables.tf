@@ -2,6 +2,13 @@ variable "lambda_name" {
   type = string
 }
 
+variable "api_id" { type = string }
+
+variable "gwapi_route_key" {
+  type = string
+}
+
+
 variable "handler" {
   type    = string
   default = "handler.handler"
@@ -133,15 +140,4 @@ EOT
 variable "alb_proxy_id" {
   type = string
   description = "Id do proxy de integração do ALB criado no módulo ALB-API-Gateway"
-}
-
-variable "payload_format_version" {
-  description = "Payload format version for the integration"
-  type = string
-  default = "2.0"
-}
-
-variable "api_id" {
-    description = "API Gateway v2 API id"
-    type = string
 }
