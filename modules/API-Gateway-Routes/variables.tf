@@ -1,5 +1,6 @@
 // filepath: c:\Users\mateu\GolandProjects\infra\API-Gateway-Routes\variables.tf
 variable "api_id" { type = string }
+variable "gwapi_route_key" { type = string }
 
 // Optional JWT authorizer and restricted route
 variable "jwt_authorizer_enabled" {

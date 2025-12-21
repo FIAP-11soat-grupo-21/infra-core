@@ -2,12 +2,10 @@ variable "lambda_name" {
   type = string
 }
 
-variable "api_id" { type = string }
-
-variable "gwapi_route_key" {
-  type = string
+variable "source_path" {
+  type        = string
+  description = "Path to lambda source directory to be zipped by data.archive_file"
 }
-
 
 variable "handler" {
   type    = string
@@ -135,9 +133,4 @@ EOT
     effect   = optional(string, "Allow")
   }))
   default = {}
-}
-
-variable "alb_proxy_id" {
-  type = string
-  description = "Id do proxy de integração do ALB criado no módulo ALB-API-Gateway"
 }
