@@ -11,7 +11,7 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${var.api_id}/*/*"
+  source_arn    = "${var.api_gateway_arn}/*/*"
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {

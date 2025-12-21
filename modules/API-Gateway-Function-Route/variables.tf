@@ -32,4 +32,8 @@ variable "project_common_tags" {
   type = map(string)
   default = {}
 }
-
+variable "api_gateway_arn" {
+  description = "ARN of the API Gateway"
+  type = string
+  default = ""
+}
