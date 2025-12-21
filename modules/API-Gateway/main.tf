@@ -1,6 +1,6 @@
 resource "aws_apigatewayv2_api" "http_api" {
   name          = var.api_name != "" ? var.api_name : "${var.project_name}-http-api"
-  protocol_type = "REST"
+  protocol_type = "HTTP"
   tags          = var.project_common_tags
 
 }
