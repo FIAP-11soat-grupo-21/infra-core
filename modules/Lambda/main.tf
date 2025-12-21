@@ -100,3 +100,23 @@ resource "aws_security_group" "lambda_sg" {
 
   tags = var.tags
 }
+
+
+resource "aws_apigatewayv2_route" "proxy" {
+  api_id   = var.api_id
+  route_key = var.gwapi_route_key
+  target    = "integrations/${var.alb_proxy_id}"
+}
+
+resource "aws_apigatewayv2_deployment" "api_deployment" {
+  api_id = var.api_id
+
+  depends_on = [
+    aws_apigatewayv2_route.proxy,
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
