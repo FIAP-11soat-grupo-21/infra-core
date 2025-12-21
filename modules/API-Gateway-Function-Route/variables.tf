@@ -22,15 +22,9 @@ variable "lambda_name" {
   default = ""
 }
 
-variable "payload_format_version" {
-  description = "Payload format version for the integration"
+variable "lambda_integration_id" {
   type = string
-  default = "2.0"
-}
-
-variable "project_common_tags" {
-  type = map(string)
-  default = {}
+  description = "ID of the Lambda integration in API Gateway"
 }
 variable "api_gateway_arn" {
   description = "ARN of the API Gateway"

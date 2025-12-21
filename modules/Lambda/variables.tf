@@ -134,3 +134,14 @@ EOT
   }))
   default = {}
 }
+
+variable "api_id" {
+  description = "API Gateway v2 API id"
+  type = string
+}
+
+variable "payload_format_version" {
+  description = "Payload format version for the integration"
+  type = string
+  default = "2.0"
+}
