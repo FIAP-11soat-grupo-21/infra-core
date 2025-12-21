@@ -20,6 +20,26 @@ resource "aws_iam_role_policy_attachment" "vpc_access" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
+data "aws_iam_policy_document" "role_permissions" {
+  for_each = var.role_permissions
+
+  statement {
+    sid    = each.key
+    effect = each.value.effect
+
+    actions   = each.value.actions
+    resources = each.value.resources
+  }
+}
+
+resource "aws_iam_role_policy" "inline_permissions" {
+  for_each = var.role_permissions
+
+  name = "${var.lambda_name}-permissions-${each.key}"
+  role = aws_iam_role.lambda_exec.name
+  policy = data.aws_iam_policy_document.role_permissions[each.key].json
+}
+
 data "archive_file" "layer_zip" {
   count       = var.layer_enabled ? 1 : 0
   type        = "zip"
@@ -80,4 +100,3 @@ resource "aws_security_group" "lambda_sg" {
 
   tags = var.tags
 }
-

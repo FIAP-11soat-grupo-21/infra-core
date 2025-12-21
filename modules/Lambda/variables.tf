@@ -116,3 +116,21 @@ variable "memory_size" {
     type    = number
     default = 256
 }
+
+variable "role_permissions" {
+  description = <<-EOT
+Mapa de permissões a serem adicionadas à role da Lambda. A chave é um identificador (ex.: 'dynamodb', 's3', 'custom'), o valor é um objeto com 'actions' (lista de strings), 'resources' (lista de strings) e opcionalmente 'effect' (string, default 'Allow'). Exemplo:
+{
+  dynamodb = {
+    actions = ["dynamodb:GetItem", "dynamodb:PutItem"]
+    resources = ["arn:aws:dynamodb:us-east-1:123456789012:table/my-table"]
+  }
+}
+EOT
+  type = map(object({
+    actions  = list(string)
+    resources = list(string)
+    effect   = optional(string, "Allow")
+  }))
+  default = {}
+}

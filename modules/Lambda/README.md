@@ -21,6 +21,20 @@ Cria uma função AWS Lambda empacotada a partir de um diretório de código, co
 | allow_dynamodb_access | bool | Não | Adiciona permissões dinâmicas para DynamoDB (opcional) |
 | dynamo_table_arn | string | Não | ARN da tabela Dynamo para restringir permissões (opcional) |
 | tags | map(string) | Não | Tags adicionais para a função |
+| role_permissions | map(object) | Não | (Novo) Mapa de permissões opcionais a serem adicionadas à role da Lambda por "método". Cada chave é um identificador e o valor deve conter `actions` (lista de ações), `resources` (lista de ARNs) e opcionalmente `effect` (Allow/Deny). Exemplo:
+
+```hcl
+role_permissions = {
+  dynamodb = {
+    actions = ["dynamodb:GetItem", "dynamodb:PutItem"]
+    resources = ["arn:aws:dynamodb:us-east-1:123456789012:table/my-table"]
+  }
+  s3 = {
+    actions = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::my-bucket/*"]
+  }
+}
+```
 
 ## Saídas (outputs)
 
