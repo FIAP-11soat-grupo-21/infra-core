@@ -2,11 +2,6 @@ variable "lambda_name" {
   type = string
 }
 
-variable "source_path" {
-  type        = string
-  description = "Path to lambda source directory to be zipped by data.archive_file"
-}
-
 variable "handler" {
   type    = string
   default = "handler.handler"
