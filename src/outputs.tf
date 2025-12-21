@@ -91,3 +91,8 @@ output "ecr_registry_credentials_arn" {
   description = "Credencial do GHCR"
   value = module.ghcr_secret.secret_arn
 }
+
+output "api_gateway_arn" {
+  description = "ARN da API Gateway"
+  value = module.api_gateway.gateway_arn
+}
