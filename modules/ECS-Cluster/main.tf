@@ -50,7 +50,7 @@ resource "aws_iam_role_policy" "ecs_allow_get_secret" {
           "secretsmanager:DescribeSecret"
         ]
         Effect   = "Allow"
-        Resource = concat([var.registry_credentials_arn], values(var.ecs_container_secrets))
+        Resource = "*"
       },
       {
         Sid = "AllowKMSDecrypt"
