@@ -106,3 +106,13 @@ variable "s3_object_version" {
   description = "Optional S3 object version for the Lambda package (leave empty if not used)."
   default     = ""
 }
+
+variable "timeout" {
+    type    = number
+    default = 30
+}
+
+variable "memory_size" {
+    type    = number
+    default = 256
+}
