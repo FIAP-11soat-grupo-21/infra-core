@@ -116,6 +116,8 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
+  depends_on = [aws_lambda_permission.apigw]
+
   api_id                 = var.api_id
   integration_type       = "AWS_PROXY"
   integration_uri        = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${aws_lambda_function.this.arn}/invocations"
