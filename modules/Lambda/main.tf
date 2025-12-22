@@ -1,5 +1,9 @@
 data "aws_region" "current" {}
 
+data "aws_apigatewayv2_api" "this" {
+  api_id = var.api_id
+}
+
 resource "aws_iam_role" "lambda_exec" {
   name = "${var.lambda_name}-exec-role"
   assume_role_policy = jsonencode({
@@ -101,6 +105,14 @@ resource "aws_security_group" "lambda_sg" {
   }
 
   tags = var.tags
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke-${var.lambda_name != "" ? var.lambda_name : substr(md5(aws_lambda_function.this.function_name),0,8)}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${data.aws_apigatewayv2_api.this.arn}/*/*"
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
