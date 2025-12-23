@@ -64,7 +64,6 @@ resource "aws_lambda_layer_version" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  # Usar código armazenado no S3 (ao invés de arquivo zip local)
   function_name    = var.lambda_name
   role             = aws_iam_role.lambda_exec.arn
   handler          = var.handler
@@ -74,7 +73,6 @@ resource "aws_lambda_function" "this" {
 
   s3_bucket = var.s3_bucket
   s3_key    = var.s3_key
-  # Opcional: s3_object_version = var.s3_object_version
 
   environment {
     variables = var.environment
@@ -112,12 +110,12 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${data.aws_apigatewayv2_api.this.arn}/*/*"
+  source_arn    = "${data.aws_apigatewayv2_api.this.execution_arn}/*/*"
+
+  depends_on = [aws_apigatewayv2_integration.lambda]
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
-  depends_on = [aws_lambda_permission.apigw]
-
   api_id                 = var.api_id
   integration_type       = "AWS_PROXY"
   integration_uri        = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${aws_lambda_function.this.arn}/invocations"
