@@ -1,3 +1,11 @@
+#---------------------------------------------------------------------------------------------#
+# Module para configurar um Application Load Balancer (ALB) interno
+#---------------------------------------------------------------------------------------------#
+
+data "aws_vpc" "selected" {
+  id = var.vpc_id
+}
+
 resource "aws_security_group" "alb_sg" {
   name        = "${var.loadbalancer_name}-alb-sg"
   description = "SG para ALB (interno)"
@@ -8,7 +16,7 @@ resource "aws_security_group" "alb_sg" {
     from_port   = var.app_port
     to_port     = var.app_port
     protocol    = "tcp"
-    cidr_blocks = var.vpc_cidr_blocks
+    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   egress {
@@ -59,4 +67,6 @@ resource "aws_lb_listener" "listener" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.tg.arn
   }
+
+  tags = merge(var.project_common_tags, { Name = "${var.loadbalancer_name}-listener" })
 }

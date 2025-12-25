@@ -3,7 +3,7 @@ variable "project_name" {
 }
 
 variable "project_common_tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
@@ -13,19 +13,5 @@ variable "vpc_id" {
 
 variable "private_subnet_ids" {
   type = list(string)
-}
-
-variable "registry_credentials_arn" {
-  type = string
-}
-
-variable "ecs_container_secrets" {
-  type = map(string)
-  default = {}
-}
-
-variable "project_description" {
-  type = string
-  default = ""
 }
 

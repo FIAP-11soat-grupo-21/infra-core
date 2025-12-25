@@ -1,35 +1,50 @@
 # Módulo SM (Secrets Manager)
 
-## Descrição
+Este módulo cria um secret no AWS Secrets Manager contendo pares chave/valor passados como mapa.
 
-Este módulo cria segredos no AWS Secrets Manager e retorna o ARN do secret.
+Objetivos
+- Centralizar segredos da aplicação e expor o ARN/ID (se necessário via output). 
 
-## Entradas (inputs)
+Requisitos
+- Terraform 0.12+ e provider AWS configurado.
 
-| Nome | Tipo | Obrigatório | Descrição |
-|------|------|:----------:|----------|
-| project_common_tags | map(string) | Sim | Tags comuns do projeto |
-| project_name | string | Sim | Nome do projeto |
-| secret_name | string | Sim | Nome do secret a ser criado |
-| secret_content | map(string) | Sim | Conteúdo do secret (pares chave/valor) |
-
-## Saídas (outputs)
-
-| Nome | Descrição |
-|------|-----------|
-| secret_arn | ARN do secret criado |
-
-## Exemplo
+Uso
 
 ```hcl
-module "ghcr_secret" {
-  source = "../SM"
-  project_common_tags = local.project_common_tags
-  project_name = var.project_name
-  secret_name = "${var.project_name}9-ghcr"
-  secret_content = var.secret_content
+module "secrets" {
+  source = "../../modules/SM"
+
+  project_name   = "myproject"
+  secret_name    = "myapp/credentials"
+  secret_content = {
+    DB_USER = "admin"
+    DB_PASS = "s3cr3t"
+  }
 }
 ```
 
-## Notas
-- Proteja o arquivo `values.tfvars` e quaisquer lugares onde segredos possam ser expostos.
+Inputs (variáveis)
+
+| Nome | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `project_name` | string | n/a | Nome do projeto. |
+| `project_common_tags` | map(string) | `{}` | Tags aplicadas aos recursos. |
+| `secret_name` | string | n/a | Nome do secret no Secrets Manager. |
+| `secret_content` | map(string) | n/a | Conteúdo do secret em pares chave/valor. |
+
+Outputs
+
+Esse módulo atualmente não expõe outputs explicitamente. Caso precise do ARN ou do id do secret, posso adicionar outputs opcionais (por exemplo `secret_arn` e `secret_id`).
+
+Boas práticas
+- Nunca armazene secrets em repositórios de código.
+- Utilize políticas de rotação e controle de acesso para os secrets.
+
+Comandos úteis
+
+```bash
+terraform init
+terraform validate
+terraform plan -var-file=env/dev.tfvars
+```
+

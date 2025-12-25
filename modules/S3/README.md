@@ -1,54 +1,64 @@
 # Módulo S3
 
-## Descrição
+Este módulo cria um bucket S3 com opções de versionamento, criptografia, políticas de bloqueio público e regras de ciclo de vida.
 
-Cria um bucket S3 com configurações comuns: versionamento, bloqueio de acesso público, criptografia server-side (KMS opcional) e regra de lifecycle opcional.
+Objetivos
+- Prover um bucket S3 seguro e configurável para armazenar objetos de aplicação, artefatos ou backups.
 
-## Entradas (inputs)
+Requisitos
+- Terraform 0.12+ e provider AWS configurado.
 
-| Nome | Tipo | Obrigatório | Descrição |
-|------|------|:----------:|----------|
-| bucket_name | string | Sim | Nome próprio do bucket S3. Deve ser único globalmente — NÃO use o nome do projeto |
-| acl | string | Não | ACL do bucket (default: "private") |
-| force_destroy | bool | Não | Permite destruir o bucket mesmo que contenha objetos (default: false) |
-| project_common_tags | map(string) | Não | Tags comuns aplicadas aos recursos (default: {}) |
-| enable_versioning | bool | Não | Habilita versionamento (default: true) |
-| enable_encryption | bool | Não | Habilita criptografia server-side (default: true) |
-| kms_key_id | string | Não | ID da chave KMS (opcional). Se vazio, usa AES256 |
-| block_public_acls | bool | Não | Bloquear ACLs públicos (default: true) |
-| block_public_policy | bool | Não | Bloquear políticas públicas (default: true) |
-| ignore_public_acls | bool | Não | Ignorar ACLs públicos (default: true) |
-| restrict_public_buckets | bool | Não | Restringir buckets públicos (default: true) |
-| enable_lifecycle_rule | bool | Não | Habilita regra de lifecycle para expirar objetos (default: false) |
-| lifecycle_days | number | Não | Dias para expiração quando a regra está habilitada (default: 30) |
-
-## Saídas (outputs)
-
-| Nome | Descrição |
-|------|-----------|
-| bucket_id | Nome (ID) do bucket criado |
-| bucket_arn | ARN do bucket |
-| bucket_domain_name | Nome de domínio do bucket (ex.: bucket.s3.amazonaws.com) |
-
-## Exemplo
+Uso
 
 ```hcl
-module "storage" {
-  source = "../S3"
+module "s3_bucket" {
+  source = "../../modules/S3"
 
-  bucket_name = "meu-nome-proprio-bucket"
-  project_common_tags = {
-    Environment = "dev"
-    Owner       = "team-a"
-  }
-
-  # opções opcionais
+  bucket_name = "my-app-artifacts"
   enable_versioning = true
   enable_encryption = true
-  # kms_key_id = "arn:aws:kms:..."
+  kms_key_id = ""
+  project_common_tags = { Environment = var.environment }
 }
 ```
 
-## Notas
-- O `bucket_name` deve ser único globalmente. Por segurança e organização, use um nome próprio (por exemplo: `meu-nome-proprio-bucket`) e NÃO utilize apenas o nome do projeto.
-- Se precisar que o bucket permita conteúdo público (ex.: site estático), ajuste conscientemente as configurações de `public_access_block`.
+Inputs (variáveis)
+
+| Nome | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `bucket_name` | string | n/a | Nome global do bucket (obrigatório). |
+| `acl` | string | `private` | ACL do bucket. |
+| `force_destroy` | bool | `false` | Permite destruir bucket mesmo com objetos. |
+| `project_common_tags` | map(string) | `{}` | Tags aplicadas aos recursos. |
+| `enable_versioning` | bool | `true` | Habilita versionamento. |
+| `enable_encryption` | bool | `true` | Habilita criptografia server-side. |
+| `kms_key_id` | string | `""` | ID da chave KMS para SSE (opcional). |
+| `block_public_acls` | bool | `true` | Bloquear ACLs públicos. |
+| `block_public_policy` | bool | `true` | Bloquear políticas públicas. |
+| `ignore_public_acls` | bool | `true` | Ignorar ACLs públicos. |
+| `restrict_public_buckets` | bool | `true` | Restringir buckets públicos. |
+| `enable_lifecycle_rule` | bool | `false` | Habilita regra de lifecycle que expira objetos. |
+| `lifecycle_days` | number | `30` | Dias para expirar objetos quando `enable_lifecycle_rule` é `true`. |
+
+Outputs
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `bucket_id` | string | ID (nome) do bucket S3. |
+| `bucket_name` | string | Nome do bucket (alias para `bucket_id`). |
+| `bucket_arn` | string | ARN do bucket. |
+| `bucket_domain_name` | string | Nome de domínio do bucket (ex.: `bucket.s3.amazonaws.com`). |
+| `bucket_regional_domain_name` | string | Nome de domínio regional do bucket. |
+
+Boas práticas
+- Evite `force_destroy = true` em produção sem um processo de backup/replicação.
+- Utilize políticas e bloqueios públicos para prevenir exposição acidental de dados.
+
+Comandos úteis
+
+```bash
+terraform init
+terraform validate
+terraform plan -var-file=env/dev.tfvars
+```
+

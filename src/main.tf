@@ -10,7 +10,6 @@ module "application_registry" {
   source = "../modules/APP-Registry"
 
   project_common_tags = local.project_common_tags
-
   project_name        = var.project_name
   project_description = var.project_description
 }
@@ -42,14 +41,11 @@ module "ecs_cluster" {
   depends_on = [module.ghcr_secret]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
-  project_name        = var.project_name
 
-  vpc_id               = module.vcp.vpc_id
-  private_subnet_ids   = module.vcp.private_subnets
-
-  registry_credentials_arn = module.ghcr_secret.secret_arn
+  project_name             = var.project_name
+  vpc_id                   = module.vcp.vpc_id
+  private_subnet_ids       = module.vcp.private_subnets
 }
-
 
 module "alb" {
   source = "../modules/ALB"
@@ -58,20 +54,19 @@ module "alb" {
 
   vpc_id             = module.vcp.vpc_id
   private_subnet_ids = module.vcp.private_subnets
-
-  loadbalancer_name = var.lb_name
-  vpc_cidr_blocks   = [var.vpc_cidr]
-  is_internal       = true
+  loadbalancer_name  = var.lb_name
+  is_internal        = true
 }
 
 module "api_gateway" {
   source = "../modules/API-Gateway"
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
-  project_name        = var.project_name
-  private_subnet_ids  = module.vcp.private_subnets
+
+  project_name          = var.project_name
+  private_subnet_ids    = module.vcp.private_subnets
   alb_security_group_id = module.alb.alb_security_group_id
-  api_name = var.gwapi_name
-  gwapi_auto_deploy = true
-  stage_name = "v1"
+  api_name              = var.gwapi_name
+  gwapi_auto_deploy     = true
+  stage_name            = "v1"
 }

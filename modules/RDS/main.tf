@@ -1,16 +1,11 @@
-data "aws_region" "current" {}
-
-data "aws_prefix_list" "s3"{
-    filter {
-      name = "prefix-list-name"
-      values = ["com.amazonaws.${data.aws_region.current.name}.s3"]
-    }
-}
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar um banco de dados RDS com segurança e gerenciamento de credenciais
+#---------------------------------------------------------------------------------------------#
 
 # Configuração de grupo de segurança para o RDS
 resource "aws_db_subnet_group" "rds" {
   description = "security group para o rds ${var.db_engine}"
-  subnet_ids = var.private_subnets
+  subnet_ids  = var.private_subnets
 
   tags = merge(var.project_common_tags, {
     Name = "sg-${var.db_engine}-rds"
@@ -19,9 +14,9 @@ resource "aws_db_subnet_group" "rds" {
 
 # Configuração da regra
 resource "aws_security_group" "rds_allow_app" {
-  name  = "${var.db_engine}-rds-allow-${var.app_name}"
+  name        = "${var.db_engine}-rds-allow-${var.app_name}"
   description = "Allow access to RDS from ${var.app_name}"
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = var.db_port
@@ -42,18 +37,18 @@ resource "aws_security_group" "rds_allow_app" {
 resource "aws_db_instance" "database" {
   depends_on = [random_password.db_password]
 
-  identifier           = "${var.db_engine}-${var.app_name}"
-  allocated_storage    = var.db_allocated_storage
-  storage_type         = var.db_storage_type
-  engine               = var.db_engine
-  engine_version       = var.db_engine_version
-  instance_class       = var.db_instance_class
-  username             = var.db_username
-  password             = random_password.db_password.result
+  identifier          = "${var.db_engine}-${var.app_name}"
+  allocated_storage   = var.db_allocated_storage
+  storage_type        = var.db_storage_type
+  engine              = var.db_engine
+  engine_version      = var.db_engine_version
+  instance_class      = var.db_instance_class
+  username            = var.db_username
+  password            = random_password.db_password.result
   skip_final_snapshot = true
 
   vpc_security_group_ids = [aws_security_group.rds_allow_app.id]
-  db_subnet_group_name = aws_db_subnet_group.rds.name
+  db_subnet_group_name   = aws_db_subnet_group.rds.name
 
   tags = merge(var.project_common_tags, {
     Name = "${var.db_engine}-${var.app_name}-db"
@@ -62,8 +57,8 @@ resource "aws_db_instance" "database" {
 
 # Senha gerada para o banco de dados
 resource "random_password" "db_password" {
-    length  = 14
-    special = false
+  length  = 14
+  special = false
 }
 
 resource "random_id" "secret_suffix" {
@@ -72,13 +67,13 @@ resource "random_id" "secret_suffix" {
 
 # Criar secret no secret manager
 resource "aws_secretsmanager_secret" "db_credentials" {
-    name = "${var.db_engine}-${random_id.secret_suffix.hex}-db-password"
-    description = "Senha do banco de dados ${var.db_engine}."
-    tags = var.project_common_tags
+  name        = "${var.db_engine}-${random_id.secret_suffix.hex}-db-password"
+  description = "Senha do banco de dados ${var.db_engine}."
+  tags        = var.project_common_tags
 }
 
 # Configuração de secret manager
 resource "aws_secretsmanager_secret_version" "db_credentials" {
-  secret_id = aws_secretsmanager_secret.db_credentials.id
+  secret_id     = aws_secretsmanager_secret.db_credentials.id
   secret_string = random_password.db_password.result
 }

@@ -1,18 +1,18 @@
 variable "project_name" {
-    description = "Nome do projeto para identificação dos recursos"
-    type        = string
+  description = "Nome do projeto para identificação dos recursos"
+  type        = string
 }
 
 variable "project_common_tags" {
-    description = "Tags comuns para todos os recursos do projeto"
-    type        = map(string)
-    default = {}
+  description = "Tags comuns para todos os recursos do projeto"
+  type        = map(string)
+  default     = {}
 }
 
 variable "api_name" {
   description = "Nome da API Gateway (opcional)"
   type        = string
-  default     = ""
+  default     = "MyHTTPAPI"
 }
 
 variable "private_subnet_ids" {
@@ -26,9 +26,12 @@ variable "alb_security_group_id" {
 }
 
 variable "gwapi_auto_deploy" {
-  type = bool
+  description = "Habilitar auto deploy para a API Gateway"
+  default     = true
+  type        = bool
 }
 
 variable "stage_name" {
-  type = string
+  description = "Nome do stage da API Gateway"
+  type        = string
 }

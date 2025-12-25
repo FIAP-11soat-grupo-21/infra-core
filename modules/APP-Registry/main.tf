@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar o Application Registry no AWS Service Catalog
+#---------------------------------------------------------------------------------------------#
+
 # Recurso do Application Registry no AWS Service Catalog
 resource "aws_servicecatalogappregistry_application" "app_catalog" {
   name        = var.project_name
@@ -12,7 +16,7 @@ resource "aws_servicecatalogappregistry_attribute_group" "attribute_group" {
   description = "Grupo de atributos para o projeto ${var.project_name}"
 
   attributes = jsonencode({
-    Project     = var.project_name
+    Project = var.project_name
   })
 
   tags = var.project_common_tags
@@ -20,6 +24,6 @@ resource "aws_servicecatalogappregistry_attribute_group" "attribute_group" {
 
 # Associação do grupo de atributos ao Application Registry
 resource "aws_servicecatalogappregistry_attribute_group_association" "attribute_group_association" {
-  application_id = aws_servicecatalogappregistry_application.app_catalog.id
+  application_id     = aws_servicecatalogappregistry_application.app_catalog.id
   attribute_group_id = aws_servicecatalogappregistry_attribute_group.attribute_group.id
 }

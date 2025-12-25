@@ -17,8 +17,8 @@ secret_content = {
 lb_name = "gateway"
 
 # API Gateway Variables
-gwapi_name          = "restaurant-api"
-gwapi_stage_name    = "v1"
+gwapi_name       = "restaurant-api"
+gwapi_stage_name = "v1"
 
 # RDS variables
 db_port              = 5432

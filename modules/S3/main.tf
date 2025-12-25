@@ -1,3 +1,8 @@
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar um bucket S3 com opções de segurança e versionamento
+#---------------------------------------------------------------------------------------------#
+
+
 resource "aws_s3_bucket" "this" {
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
@@ -25,7 +30,7 @@ resource "aws_s3_bucket_public_access_block" "this" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
-  count  = var.enable_encryption ? 1 : 0
+  count = var.enable_encryption ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 
@@ -38,7 +43,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
-  count  = var.enable_lifecycle_rule ? 1 : 0
+  count = var.enable_lifecycle_rule ? 1 : 0
 
   bucket = aws_s3_bucket.this.id
 

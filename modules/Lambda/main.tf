@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar uma função Lambda integrada ao API Gateway
+#---------------------------------------------------------------------------------------------#
+
 data "aws_region" "current" {}
 
 data "aws_apigatewayv2_api" "this" {
@@ -9,8 +13,8 @@ resource "aws_iam_role" "lambda_exec" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
       Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
@@ -41,8 +45,8 @@ data "aws_iam_policy_document" "role_permissions" {
 resource "aws_iam_role_policy" "inline_permissions" {
   for_each = var.role_permissions
 
-  name = "${var.lambda_name}-permissions-${each.key}"
-  role = aws_iam_role.lambda_exec.name
+  name   = "${var.lambda_name}-permissions-${each.key}"
+  role   = aws_iam_role.lambda_exec.name
   policy = data.aws_iam_policy_document.role_permissions[each.key].json
 }
 
@@ -54,22 +58,22 @@ data "archive_file" "layer_zip" {
 }
 
 resource "aws_lambda_layer_version" "this" {
-  count                     = var.layer_enabled ? 1 : 0
-  filename                  = data.archive_file.layer_zip[0].output_path
-  layer_name                = var.layer_name
-  compatible_runtimes       = var.layer_compatible_runtimes
-  compatible_architectures  = var.layer_compatible_architectures
-  description               = var.layer_description
-  license_info              = var.layer_license_info
+  count                    = var.layer_enabled ? 1 : 0
+  filename                 = data.archive_file.layer_zip[0].output_path
+  layer_name               = var.layer_name
+  compatible_runtimes      = var.layer_compatible_runtimes
+  compatible_architectures = var.layer_compatible_architectures
+  description              = var.layer_description
+  license_info             = var.layer_license_info
 }
 
 resource "aws_lambda_function" "this" {
-  function_name    = var.lambda_name
-  role             = aws_iam_role.lambda_exec.arn
-  handler          = var.handler
-  runtime          = var.runtime
-  timeout         = var.timeout
-  memory_size     = var.memory_size
+  function_name = var.lambda_name
+  role          = aws_iam_role.lambda_exec.arn
+  handler       = var.handler
+  runtime       = var.runtime
+  timeout       = var.timeout
+  memory_size   = var.memory_size
 
   s3_bucket = var.s3_bucket
   s3_key    = var.s3_key
@@ -95,10 +99,10 @@ resource "aws_security_group" "lambda_sg" {
   vpc_id      = var.vpc_id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
@@ -106,7 +110,7 @@ resource "aws_security_group" "lambda_sg" {
 }
 
 resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowAPIGatewayInvoke-${var.lambda_name != "" ? var.lambda_name : substr(md5(aws_lambda_function.this.function_name),0,8)}"
+  statement_id  = "AllowAPIGatewayInvoke-${var.lambda_name != "" ? var.lambda_name : substr(md5(aws_lambda_function.this.function_name), 0, 8)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
   principal     = "apigateway.amazonaws.com"

@@ -35,7 +35,7 @@ output "vpc_cdir_block" {
 
 output "private_subnet_id" {
   description = "ID da subnet privada (retorna a lista para compatibilidade)"
-  value = module.vcp.private_subnets
+  value       = module.vcp.private_subnets
 }
 
 output "project_name" {
@@ -79,7 +79,7 @@ output "api_gateway_stage_name" {
 
 output "cloudwatch_log_group" {
   description = "CloudWatch log group usado pelo ECS"
-  value = module.ecs_cluster.cloudwatch_log_group
+  value       = module.ecs_cluster.cloudwatch_log_group
 }
 
 output "rds_postgres_db_username" {
@@ -89,10 +89,10 @@ output "rds_postgres_db_username" {
 
 output "ecr_registry_credentials_arn" {
   description = "Credencial do GHCR"
-  value = module.ghcr_secret.secret_arn
+  value       = module.ghcr_secret.secret_arn
 }
 
 output "api_gateway_arn" {
   description = "ARN da API Gateway"
-  value = module.api_gateway.gateway_arn
+  value       = module.api_gateway.api_gateway_arn
 }

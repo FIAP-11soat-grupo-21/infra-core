@@ -1,10 +1,9 @@
-// DynamoDB module: create a table with optional GSIs, TTL, SSE and an IAM policy for access
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar uma tabela DynamoDB com opções de segurança e índices secundários
+#---------------------------------------------------------------------------------------------#
 
-data "aws_caller_identity" "current" {}
 
-data "aws_region" "current" {}
-
-resource "aws_dynamodb_table" "this" {
+resource "aws_dynamodb_table" "table" {
   name         = var.name
   billing_mode = var.billing_mode
   hash_key     = var.hash_key
@@ -76,7 +75,7 @@ resource "aws_dynamodb_table" "this" {
 }
 
 resource "aws_iam_policy" "access_policy" {
-  name   = "${var.name}-dynamodb-access"
+  name = "${var.name}-dynamodb-access"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -87,19 +86,19 @@ resource "aws_iam_policy" "access_policy" {
           "dynamodb:BatchGetItem",
           "dynamodb:Query",
           "dynamodb:Scan"
-        ] : [
+          ] : [
           "dynamodb:*"
         ],
         Resource = [
-          aws_dynamodb_table.this.arn,
-          "${aws_dynamodb_table.this.arn}/index/*"
+          aws_dynamodb_table.table.arn,
+          "${aws_dynamodb_table.table.arn}/index/*"
         ]
       },
       // allow DescribeTable for callers
       {
-        Effect = "Allow",
-        Action = ["dynamodb:DescribeTable"],
-        Resource = aws_dynamodb_table.this.arn
+        Effect   = "Allow",
+        Action   = ["dynamodb:DescribeTable"],
+        Resource = aws_dynamodb_table.table.arn
       }
     ]
   })

@@ -18,7 +18,7 @@ variable "environment" {
 }
 
 variable "subnet_ids" {
-  type = list(string)
+  type        = list(string)
   description = "Subnet IDs where Lambda should be placed (required for VPC access)."
 
   validation {
@@ -96,20 +96,14 @@ variable "s3_key" {
   default     = ""
 }
 
-variable "s3_object_version" {
-  type        = string
-  description = "Optional S3 object version for the Lambda package (leave empty if not used)."
-  default     = ""
-}
-
 variable "timeout" {
-    type    = number
-    default = 30
+  type    = number
+  default = 30
 }
 
 variable "memory_size" {
-    type    = number
-    default = 256
+  type    = number
+  default = 256
 }
 
 variable "role_permissions" {
@@ -123,20 +117,20 @@ Mapa de permissões a serem adicionadas à role da Lambda. A chave é um identif
 }
 EOT
   type = map(object({
-    actions  = list(string)
+    actions   = list(string)
     resources = list(string)
-    effect   = optional(string, "Allow")
+    effect    = optional(string, "Allow")
   }))
   default = {}
 }
 
 variable "api_id" {
   description = "API Gateway v2 API id"
-  type = string
+  type        = string
 }
 
 variable "payload_format_version" {
   description = "Payload format version for the integration"
-  type = string
-  default = "2.0"
+  type        = string
+  default     = "2.0"
 }

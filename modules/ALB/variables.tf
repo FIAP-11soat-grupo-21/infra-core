@@ -1,35 +1,35 @@
 variable "vpc_id" {
-  type = string
+  description = "Id da VPC onde o ALB será criado"
+  type        = string
 }
 
 variable "private_subnet_ids" {
-  type = list(string)
+  description = "Lista de IDs das subnets privadas onde o ALB será criado"
+  type        = list(string)
 }
 
 variable "app_port" {
-  type    = number
-  default = 80
+  description = "Porta onde a aplicação está escutando"
+  type        = number
+  default     = 80
 }
 
 variable "health_check_path" {
-  type    = string
-  default = "/"
+  description = "Caminho usado para health check no target group do ALB"
+  type        = string
+  default     = "/"
 }
 
 variable "project_common_tags" {
-  type    = map(string)
-  default = {}
+  description = "Tags comuns para o projeto"
+  type        = map(string)
+  default     = {}
 }
 
 variable "loadbalancer_name" {
-  type    = string
-  default = "myapp"
-}
-
-variable "vpc_cidr_blocks" {
-  description = "Lista de blocos CIDR permitidos no SG do ALB (por exemplo a CIDR da VPC)"
-  type        = list(string)
-  default     = []
+  description = "Nome base para o Application Load Balancer"
+  type        = string
+  default     = "myapp"
 }
 
 variable "is_internal" {

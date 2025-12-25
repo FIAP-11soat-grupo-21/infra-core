@@ -1,4 +1,3 @@
-// filepath: c:\Users\mateu\GolandProjects\infra\API-Gateway-Routes\variables.tf
 variable "api_id" { type = string }
 variable "gwapi_route_key" { type = string }
 
@@ -35,6 +34,6 @@ variable "restricted_route_key" {
 }
 
 variable "alb_proxy_id" {
-  type = string
+  type        = string
   description = "Id do proxy de integração do ALB criado no módulo ALB-API-Gateway"
 }

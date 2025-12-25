@@ -1,60 +1,101 @@
 # Módulo API-Gateway-Routes
 
-## Descrição
+Este módulo configura rotas no API Gateway (HTTP API v2) integradas a um Application Load Balancer (ALB) via integração (integration proxy). O módulo cria uma rota principal (proxy), opcionalmente um autorizador JWT e uma rota restrita protegida por este autorizador.
 
-Cria rotas e integrações para a API Gateway (HTTP API v2). Este módulo assume que a API e o VPC Link já foram criados pelo módulo `API-Gateway`.
+Propósito
+- Fazer a ponte entre a API Gateway e um ALB (integração `integrations/<alb_proxy_id>`).
+- Permitir configuração opcional de um autorizador JWT e uma rota que exija autenticação.
 
-## Entradas (inputs)
+Requisitos
+- Terraform 0.12+.
+- A API Gateway (HTTP API v2) deve já existir; passe o `api_id` como entrada.
+- A integração do ALB (proxy) deve ser criada previamente (p.ex. pelo módulo que cria o ALB e o VPC Link) e seu id deve ser passado em `alb_proxy_id`.
 
-| Nome | Tipo | Obrigatório | Descrição |
-|------|------|:----------:|----------|
-| api_id | string | Sim | ID da API Gateway onde as rotas serão criadas |
-| vpc_link_id | string | Sim | ID do VPC Link para integração com ALB |
-| alb_listener_arn | string | Sim | ARN do listener do ALB (usado para integração) |
-| gwapi_route_key | string | Sim | Rota a ser criada (ex: "ANY /{proxy+}") |
-| gwapi_auto_deploy | bool | Não | Habilita auto-deploy |
-| stage_name | string | Não | Nome do estágio |
-| project_common_tags | map(string) | Não | Tags comuns do projeto |
-| api_gw_logs_arn | string | Não | ARN do log group da API |
-| jwt_authorizer_enabled | bool | Não | Habilita a criação de um Authorizer JWT |
-| jwt_authorizer_name | string | Não | Nome do authorizer JWT |
-| jwt_issuer | string | Cond. | Issuer do JWT (ex: https://cognito-idp.{region}.amazonaws.com/{userPoolId} ou provedor OIDC) |
-| jwt_audiences | list(string) | Cond. | Lista de audiences válidas |
-| jwt_identity_sources | list(string) | Não | Fontes de identidade (padrão: "$request.header.Authorization") |
-| restricted_route_key | string | Não | Rota opcional que exigirá JWT (ex: "GET /restricted") |
+Uso
 
-Notas:
-- `jwt_issuer` e `jwt_audiences` são obrigatórios quando `jwt_authorizer_enabled = true`.
-
-## Saídas (outputs)
-
-| Nome | Descrição |
-|------|-----------|
-| (nenhuma) | As saídas importantes ficam no módulo `API-Gateway` principal |
-
-## Exemplo
+Exemplo básico (rota proxy pública):
 
 ```hcl
-module "api_gateway_routes" {
-  source            = "../API-Gateway-Routes"
-  api_id            = module.api_gateway.api_id
-  vpc_link_id       = module.api_gateway.vpc_link_id
-  alb_listener_arn  = module.alb.listener_arn
-  gwapi_route_key   = "ANY /{proxy+}"
-  gwapi_auto_deploy = true
-  stage_name        = "$default"
+module "api_routes" {
+  source        = "../../modules/API-Gateway-Routes"
 
-  # Configuração opcional de rota protegida por JWT
-  jwt_authorizer_enabled = true
-  jwt_authorizer_name    = "jwt-auth"
-  jwt_issuer             = var.jwt_issuer
-  jwt_audiences          = ["my-api"]
-  jwt_identity_sources   = ["$request.header.Authorization"]
-
-  # Rota que exigirá JWT
-  restricted_route_key = "GET /restricted"
+  api_id        = module.api_gateway.api_id
+  gwapi_route_key = "ANY /{proxy+}"
+  alb_proxy_id  = module.api_gateway.alb_proxy_id
 }
 ```
 
-## Notas
-- O módulo cria rotas do tipo HTTP->ALB. Quando habilitado, adiciona um authorizer JWT e uma rota adicional protegida por ele.
+Exemplo com JWT authorizer e rota restrita:
+
+```hcl
+module "api_routes_secure" {
+  source               = "../../modules/API-Gateway-Routes"
+
+  api_id               = module.api_gateway.api_id
+  gwapi_route_key      = "ANY /{proxy+}"
+  alb_proxy_id         = module.api_gateway.alb_proxy_id
+
+  jwt_authorizer_enabled = true
+  jwt_authorizer_name    = "my-jwt-auth"
+  jwt_issuer             = "https://accounts.example.com/"
+  jwt_audiences          = ["api://default"]
+
+  # Rota que exigirá JWT
+  restricted_route_key  = "GET /secure"
+}
+```
+
+Inputs (variáveis)
+
+| Nome | Tipo | Default | Obrigatório | Descrição |
+|------|------|---------|------------:|-----------|
+| `api_id` | string | n/a | sim | ID da API Gateway (HTTP API v2) onde as rotas serão criadas. |
+| `gwapi_route_key` | string | n/a | sim | Route key do API Gateway (ex.: `ANY /{proxy+}`, `GET /health`). |
+| `jwt_authorizer_enabled` | bool | `false` | não | Habilita criação de autorizador JWT (se true cria o recurso `aws_apigatewayv2_authorizer`). |
+| `jwt_authorizer_name` | string | `"jwt-authorizer"` | não | Nome do autorizador JWT criado. |
+| `jwt_issuer` | string | `null` | não* | URL do issuer (ex.: `https://accounts.example.com/`). Requerido se `jwt_authorizer_enabled = true`. |
+| `jwt_audiences` | list(string) | `[]` | não* | Lista de audiences esperadas pelo autorizador JWT. Recomendado configurar quando `jwt_authorizer_enabled = true`. |
+| `jwt_identity_sources` | list(string) | `["$request.header.Authorization"]` | não | Fonte(s) de identidade para o autorizador (p.ex. header Authorization). |
+| `restricted_route_key` | string | `null` | não | Route key opcional que será protegida pelo autorizador JWT. Ex.: `GET /secure`. Se `null` não é criada rota restrita. |
+| `alb_proxy_id` | string | n/a | sim | ID da integração (proxy) do ALB no API Gateway. Normalmente obtido do módulo que cria a integração ALB<->API Gateway. |
+
+Notas sobre inputs
+- Se `jwt_authorizer_enabled = true`, forneça `jwt_issuer` e `jwt_audiences` adequados; do contrário a configuração do autorizador ficará incompleta.
+- `gwapi_route_key` determina a rota criada. Para criar rotas adicionais, instancie o módulo múltiplas vezes com `count`/`for_each` ou estenda o módulo.
+- `alb_proxy_id` geralmente vem de um recurso `aws_apigatewayv2_integration` criado previamente.
+
+Outputs
+
+Este módulo não fornece outputs explícitos. Ele cria os recursos:
+- `aws_apigatewayv2_route.proxy`
+- `aws_apigatewayv2_deployment.api_deployment`
+- `aws_apigatewayv2_authorizer.jwt` (opcional)
+- `aws_apigatewayv2_route.restricted` (opcional)
+
+Se você precisar de outputs (ex.: ID da rota, ID do authorizer), adicione um `output` no módulo ou abra uma issue/pull request para que eu adicione them.
+
+Boas práticas
+- Garanta que a API (`api_id`) exista antes de aplicar o módulo.
+- Use `count` ou `for_each` no módulo chamador para criar múltiplas rotas de forma declarativa.
+- Crie uma integração reutilizável (`aws_apigatewayv2_integration`) que retorne o `integration_id` (`alb_proxy_id`) e compartilhe entre instâncias do módulo.
+- Para ambientes produtivos configure `stage` e deployments fora deste módulo, ou adapte o módulo para suportar lifecycle/auto-deploy conforme sua convenção.
+- Sempre execute `terraform validate` e `terraform plan` antes de aplicar.
+
+Comandos úteis
+
+```bash
+terraform init
+terraform validate
+terraform plan -var-file=env/dev.tfvars
+```
+
+Sugestões de melhoria
+- Adicionar outputs opcionais (route IDs, authorizer ID).
+- Permitir criar múltiplas rotas a partir de uma lista (refatoração para `for_each`).
+
+Licença
+- Confira a licença no repositório raiz.
+
+Contato
+- Atualize o README do repositório raiz com convenções e contatos do time para dúvidas sobre módulos.
+

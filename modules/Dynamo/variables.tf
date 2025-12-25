@@ -1,6 +1,6 @@
 variable "name" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "Name of the DynamoDB table; must be provided by root via var.dynamo_name or var.dynamos entries."
 
   validation {
@@ -24,9 +24,9 @@ variable "hash_key_type" {
 }
 
 variable "range_key" {
-  type    = list(object({
+  type = list(object({
     name = string,
-    type = string}
+    type = string }
   ))
   default = []
 }
@@ -43,12 +43,12 @@ variable "write_capacity" {
 
 variable "global_secondary_indexes" {
   type = list(object({
-    name = string
-    hash_key = string
-    range_key = optional(string)
+    name            = string
+    hash_key        = string
+    range_key       = optional(string)
     projection_type = optional(string)
-    read_capacity = optional(number)
-    write_capacity = optional(number)
+    read_capacity   = optional(number)
+    write_capacity  = optional(number)
   }))
   default = []
 }
@@ -104,7 +104,7 @@ variable "project_common_tags" {
 }
 
 variable "secondary_indexes" {
-  type = list(map(string))
-  default = [{}]
+  type        = list(map(string))
+  default     = [{}]
   description = "List of secondary indexes to create on the DynamoDB table."
 }

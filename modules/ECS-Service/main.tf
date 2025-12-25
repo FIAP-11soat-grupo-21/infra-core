@@ -1,3 +1,7 @@
+#---------------------------------------------------------------------------------------------#
+# Módulo para configurar o serviço ECS com definição de tarefa e recursos associados
+#---------------------------------------------------------------------------------------------#
+
 data "aws_region" "current" {}
 
 data "aws_iam_policy_document" "ecs_task_assume" {
@@ -21,12 +25,10 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
-# Nome da role a ser usada (criada internamente ou fornecida por ARN)
 locals {
   ecs_task_role_name = var.task_role_arn != "" ? split("/", var.task_role_arn)[1] : (length(aws_iam_role.ecs_task_role) > 0 ? aws_iam_role.ecs_task_role[0].name : null)
 }
 
-# Anexar policies fornecidas via parâmetro à task role
 resource "aws_iam_role_policy_attachment" "ecs_task_role_attachments" {
   count      = local.ecs_task_role_name != null ? length(var.task_role_policy_arns) : 0
   role       = local.ecs_task_role_name
@@ -34,15 +36,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_attachments" {
 }
 
 locals {
-  ecs_environment = [ for key, value in var.ecs_container_environment_variables : {
+  ecs_environment = [for key, value in var.ecs_container_environment_variables : {
     name  = key
     value = value
-  } ]
+  }]
 
-  ecs_secrets = [ for key, value in var.ecs_container_secrets : {
+  ecs_secrets = [for key, value in var.ecs_container_secrets : {
     name      = key
     valueFrom = value
-  } ]
+  }]
 
   ecs_base_container = {
     name      = var.ecs_container_name
@@ -78,11 +80,11 @@ locals {
 resource "aws_ecs_task_definition" "tasks" {
   family                   = "${var.ecs_service_name}-service"
   requires_compatibilities = ["FARGATE"]
-  network_mode              = var.ecs_network_mode
-  cpu                       = var.ecs_task_cpu
-  memory                    = var.ecs_task_memory
-  execution_role_arn        = var.task_execution_role_arn
-  task_role_arn             = var.task_role_arn != "" ? var.task_role_arn : (length(aws_iam_role.ecs_task_role) > 0 ? aws_iam_role.ecs_task_role[0].arn : null)
+  network_mode             = var.ecs_network_mode
+  cpu                      = var.ecs_task_cpu
+  memory                   = var.ecs_task_memory
+  execution_role_arn       = var.task_execution_role_arn
+  task_role_arn            = var.task_role_arn != "" ? var.task_role_arn : (length(aws_iam_role.ecs_task_role) > 0 ? aws_iam_role.ecs_task_role[0].arn : null)
 
   container_definitions = jsonencode([
     local.container_def_map
@@ -94,16 +96,16 @@ resource "aws_ecs_task_definition" "tasks" {
 }
 
 resource "aws_ecs_service" "service" {
-  name = var.ecs_service_name
-  cluster = var.cluster_id
+  name            = var.ecs_service_name
+  cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.tasks.arn
-  desired_count = var.ecs_desired_count
-  launch_type = "FARGATE"
+  desired_count   = var.ecs_desired_count
+  launch_type     = "FARGATE"
 
   network_configuration {
-      subnets         = var.private_subnet_ids
-      security_groups = [var.ecs_security_group_id]
-      assign_public_ip = false
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
   }
 
   dynamic "load_balancer" {
@@ -114,8 +116,6 @@ resource "aws_ecs_service" "service" {
       container_port   = var.ecs_container_port
     }
   }
-
-  depends_on = []
 
   tags = merge(var.project_common_tags, {
     Name = "${trimspace(var.ecs_service_name)}-ecs-service"

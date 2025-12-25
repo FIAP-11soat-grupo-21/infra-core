@@ -1,5 +1,5 @@
 variable "project_common_tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
@@ -16,8 +16,8 @@ variable "task_execution_role_arn" {
 }
 
 variable "task_role_arn" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "(Opcional) ARN da task role que será atribuída aos containers (permite chamadas AWS a partir do app)."
 }
 
@@ -30,7 +30,7 @@ variable "private_subnet_ids" {
 }
 
 variable "registry_credentials_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -47,32 +47,32 @@ variable "ecs_container_port" {
 }
 
 variable "ecs_container_environment_variables" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
 variable "ecs_container_secrets" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
 variable "ecs_desired_count" {
-  type = number
+  type    = number
   default = 1
 }
 
 variable "ecs_network_mode" {
-  type = string
+  type    = string
   default = "awsvpc"
 }
 
 variable "ecs_task_cpu" {
-  type = string
+  type    = string
   default = "256"
 }
 
 variable "ecs_task_memory" {
-  type = string
+  type    = string
   default = "512"
 }
 
@@ -81,12 +81,12 @@ variable "ecs_service_name" {
 }
 
 variable "alb_target_group_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "alb_security_group_id" {
-  type = string
+  type    = string
   default = ""
 }
 

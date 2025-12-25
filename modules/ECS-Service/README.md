@@ -1,138 +1,80 @@
 # Módulo ECS-Service
 
-## Descrição
+Este módulo cria um ECS Service e Task Definition para executar containers no cluster ECS, com integração opcional a um ALB Target Group.
 
-Cria uma task definition e um serviço ECS que roda containers; integra-se com ALB para expor o serviço.
+Objetivos
+- Criar Task Definition, ECS Service e integrar com ALB Target Group quando fornecido.
 
-## Entradas (inputs)
+Requisitos
+- Terraform 0.12+ e provider AWS configurado.
+- Um ECS Cluster existente (passe `cluster_id`), subnets privadas e security group.
 
-| Nome | Tipo | Obrigatório | Descrição |
-|------|------|:----------:|----------|
-| project_common_tags | map(string) | Sim | Tags comuns do projeto |
-| cluster_id | string | Sim | ID do cluster ECS |
-| ecs_security_group_id | string | Sim | Security Group associado às tasks |
-| task_execution_role_arn | string | Sim | ARN da role usada pelo ECS para executar tarefas (execution role) |
-| task_role_arn | string | Não | ARN da task role (role que os containers assumem para chamadas AWS). Se vazio, o módulo cria uma role internamente e a expõe como output |
-| cloudwatch_log_group | string | Sim | CloudWatch Log Group usado pelos containers |
-| private_subnet_ids | list(string) | Sim | Subnets privadas onde as tasks serão executadas |
-| registry_credentials_arn | string | Não | ARN do Secret com credenciais do registry |
-| ecs_container_name | string | Sim | Nome do container na task definition |
-| ecs_container_image | string | Sim | Imagem do container (ex: repo/image:tag) |
-| ecs_container_port | number | Sim | Porta exposta pelo container |
-| ecs_container_environment_variables | map(string) | Não | Variáveis de ambiente para o container |
-| ecs_container_secrets | map(string) | Não | Segredos a injetar no container |
-| ecs_desired_count | number | Não | Número desejado de instâncias do serviço |
-| ecs_task_cpu | string | Não | CPU da task (unit) |
-| ecs_task_memory | string | Não | Memória da task (MiB) |
-| ecs_service_name | string | Não | Nome do serviço ECS |
-| alb_target_group_arn | string | Não | ARN do target group do ALB para registrar as tasks |
-| alb_security_group_id | string | Não | ID do SG do ALB (para configurar regras) |
-| task_role_policy_arns | list(string) | Não | Lista de ARNs de policies para anexar à task role (criada pelo módulo ou fornecida) |
+Uso
 
-## Saídas (outputs)
+```hcl
+module "ecs_service" {
+  source = "../../modules/ECS-Service"
 
-| Nome | Descrição |
-|------|-----------|
-| service_id | ID do serviço ECS (se o módulo criar) |
-| task_definition_arn | ARN da task definition (se o módulo criar) |
-| task_role_arn | ARN da task role usada pela task (pode ser a role fornecida ou a role criada internamente) |
+  cluster_id                    = module.ecs_cluster.cluster_id
+  ecs_security_group_id         = module.ecs_cluster.ecs_security_group_id
+  task_execution_role_arn       = module.ecs_cluster.task_execution_role_arn
+  cloudwatch_log_group          = module.ecs_cluster.cloudwatch_log_group
+  private_subnet_ids            = module.vpc.private_subnet_ids
 
-## Integração com Dynamo (passo-a-passo)
+  ecs_container_name            = "app"
+  ecs_container_image           = "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app:latest"
+  ecs_container_port            = 8080
+  ecs_desired_count             = 2
+  ecs_service_name              = "my-app-service"
 
-Quando usar o módulo `modules/Dynamo` e quiser que seus containers ECS acessem a tabela:
-
-1) Crie uma `aws_iam_role` para ser a task role e defina a assume role policy adequada (principal = ecs-tasks.amazonaws.com).
-2) Anexe a policy criada pelo módulo Dynamo (`module.dynamo.policy_arn`) a essa role.
-3) Ao instanciar este módulo ECS, passe `task_role_arn = aws_iam_role.ecs_task_role.arn`.
-4) Adicione `module.dynamo.table_name` como variável de ambiente (`ecs_container_environment_variables`) para que a aplicação saiba qual tabela usar.
-
-Exemplo mínimo (no root module):
-
-```
-# role da task
-resource "aws_iam_role" "ecs_task_role" {
-  name = "ecs-task-role"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_attach_dynamo" {
-  role = aws_iam_role.ecs_task_role.name
-  policy_arn = module.dynamo.policy_arn
-}
-
-# instancia o módulo ECS
-module "ecs_api" {
-  source = "../ECS-Service"
-  project_common_tags = local.project_common_tags
-  project_name = var.project_name
-  cluster_id = module.ecs_cluster.cluster_id
-  private_subnet_ids = module.vcp.private_subnets
-  registry_credentials_arn = module.ghcr_secret.secret_arn
-  ecs_container_name = var.ecs_container_name
-  ecs_container_image = var.ecs_container_image
-  ecs_container_port = var.ecs_container_port
-  ecs_container_environment_variables = {
-    DDB_TABLE_NAME = module.dynamo.table_name
-  }
+  alb_target_group_arn          = module.alb.target_group_arn
+  alb_security_group_id         = module.alb.alb_security_group_id
 }
 ```
 
-## Se o módulo criar a `task role` internamente
+Inputs (variáveis)
 
-- Se você NÃO fornecer `task_role_arn` ao instanciar o módulo, o módulo `ECS-Service` cria uma `aws_iam_role` internamente e expõe a ARN desta role via output `module.ecs.task_role_arn`.
-- Recomendação: anexe a policy do Dynamo externamente ao role criado para manter responsabilidades separadas. Abaixo segue um exemplo de como fazer isso extraindo o nome da role a partir do ARN retornado pelo módulo e depois usando `aws_iam_role_policy_attachment`:
+| Nome | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `project_common_tags` | map(string) | `{}` | Tags aplicadas aos recursos. |
+| `cluster_id` | string | n/a | ID do ECS Cluster. |
+| `ecs_security_group_id` | string | n/a | ID do security group para as tasks. |
+| `task_execution_role_arn` | string | n/a | ARN da role usada para executar tasks. |
+| `task_role_arn` | string | `""` | ARN opcional da task role (se não fornecida, uma role será criada pelo módulo). |
+| `cloudwatch_log_group` | string | n/a | Nome do CloudWatch log group. |
+| `private_subnet_ids` | list(string) | n/a | Subnets privadas para tasks. |
+| `registry_credentials_arn` | string | `""` | ARN do Secret com credenciais do registry. |
+| `ecs_container_name` | string | n/a | Nome do container na task definition. |
+| `ecs_container_image` | string | n/a | Imagem do container (ECR/Registry). |
+| `ecs_container_port` | number | n/a | Porta exposta pelo container. |
+| `ecs_container_environment_variables` | map(string) | `{}` | Variáveis de ambiente para o container. |
+| `ecs_container_secrets` | map(string) | `{}` | Mapeamento de secrets do Secrets Manager para injetar no container. |
+| `ecs_desired_count` | number | `1` | Desired count do serviço. |
+| `ecs_network_mode` | string | `awsvpc` | Network mode para a task. |
+| `ecs_task_cpu` | string | `256` | CPU units para a task. |
+| `ecs_task_memory` | string | `512` | Memória para a task. |
+| `ecs_service_name` | string | n/a | Nome do ECS Service. |
+| `alb_target_group_arn` | string | `""` | ARN do Target Group do ALB para integrar o serviço (opcional). |
+| `alb_security_group_id` | string | `""` | SG do ALB (opcional). |
+| `task_role_policy_arns` | list(string) | `[]` | ARNs de policies para anexar à task role. |
 
+Outputs
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `service_id` | string | ID do ECS Service criado. |
+| `task_definition_arn` | string | ARN da Task Definition criada. |
+| `task_role_arn` | string/null | ARN da task role usada (ou `null` se não aplicável). |
+
+Boas práticas
+- Use health checks e configure o ALB Target Group health check para garantir deploys seguros.
+- Gerencie imagens em ECR e utilize rotas de cache e roles mínimos para execução.
+
+Comandos úteis
+
+```bash
+terraform init
+terraform validate
+terraform plan -var-file=env/dev.tfvars
 ```
-# instancia o ECS sem fornecer task_role_arn (role será criada internamente)
-module "ecs" {
-  source = "./modules/ECS-Service"
-  cluster_id = aws_ecs_cluster.main.id
-  ecs_security_group_id = aws_security_group.ecs.id
-  task_execution_role_arn = aws_iam_role.ecs_execution_role.arn
-  private_subnet_ids = var.private_subnet_ids
-  ecs_container_name = "app"
-  ecs_container_image = "meu-registro/minha-imagem:latest"
-  ecs_container_port = 8080
-}
 
-# depois (pode ser no mesmo root module) anexa a policy do dynamo à role criada pelo módulo
-locals {
-  ecs_task_role_name = length(module.ecs.task_role_arn) > 0 ? split("/", module.ecs.task_role_arn)[1] : ""
-}
-
-resource "aws_iam_role_policy_attachment" "attach_dynamo_to_ecs_role" {
-  count = local.ecs_task_role_name != "" ? 1 : 0
-  role       = local.ecs_task_role_name
-  policy_arn = module.dynamo.policy_arn
-}
-```
-
-## Observações sobre rede
-
-- Este módulo configura `assign_public_ip = false` nas tasks (assume subnets privadas). Se essas subnets não tiverem egress para a Internet, garanta:
-  - NAT Gateway/Instance; ou
-  - `aws_vpc_endpoint` do tipo Gateway para DynamoDB (recomendado para evitar NAT).
-
-- Autorização para acessar DynamoDB depende da `task_role_arn` (role da task). A `task_execution_role_arn` é usada apenas pelo agente do ECS para puxar imagens e logs.
-
-## Notas finais
-
-- Verifique a configuração de security groups entre ALB e tasks para permitir tráfego na porta correta.
-- Se desejar auto-scaling ou integração com Service Discovery, expanda este módulo conforme necessário.
-
-### Exemplo: passando permissões via parâmetro
-
-Se você quiser anexar permissões direto via parâmetro, forneça `task_role_policy_arns` com a lista de ARNs:
-
-```
-module "ecs" {
-  source = "./modules/ECS-Service"
-  # ...inputs obrigatórios...
-  task_role_arn = aws_iam_role.ecs_task_role.arn # opcional; se não informado, o módulo cria
-
-  task_role_policy_arns = [
-    module.dynamo.policy_arn,
-    "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
-  ]
-}
-```

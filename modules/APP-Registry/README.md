@@ -1,30 +1,53 @@
-# Módulo APP-Registry
+# Módulo APP-Registry (AWS Service Catalog AppRegistry)
 
-## Descrição
+Este módulo cria um recurso do AWS Service Catalog AppRegistry para registrar metadados de um projeto na conta.
 
-Cria recursos do Application Registry (opcional) para marcar o projeto na AWS.
+Objetivos
+- Criar uma aplicação no AppRegistry e expor seu identificador/tag para consumo por outros módulos ou recursos.
 
-## Entradas (inputs)
+Requisitos
+- Terraform 0.12+ e provider AWS configurado no módulo raiz.
 
-| Nome | Tipo | Obrigatório | Descrição |
-|------|------|:----------:|----------|
-| project_common_tags | map(string) | Sim | Tags comuns do projeto |
-| project_name | string | Sim | Nome do projeto |
-| project_description | string | Não | Descrição do projeto |
-
-## Saídas (outputs)
-
-| Nome | Descrição |
-|------|-----------|
-| app_registry_application_tag | map(string) | Tag gerada para ser mesclada com tags de outros módulos |
-
-## Exemplo
+Uso
 
 ```hcl
-module "application_registry" {
-  source = "../APP-Registry"
-  project_common_tags = local.project_common_tags
-  project_name = var.project_name
-  project_description = var.project_description
+module "app_registry" {
+  source = "../../modules/APP-Registry"
+
+  project_name        = "my-project"
+  project_description = "Descrição do projeto"
+  project_common_tags = {
+    Environment = var.environment
+    Team        = "platform"
+  }
+  environment = "dev"
 }
 ```
+
+Inputs (variáveis)
+
+| Nome | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `project_name` | string | n/a | Nome do projeto (usado para criar a aplicação no AppRegistry). |
+| `project_description` | string | `null` | Descrição opcional do projeto. |
+| `project_common_tags` | map(string) | `{}` | Tags aplicadas aos recursos. |
+| `environment` | string | `dev` | Ambiente (ex.: dev, staging, prod). |
+
+Outputs
+
+| Nome | Tipo | Descrição |
+|------|------|-----------|
+| `app_registry_application_tag` | string | Nome/tag da Application Registry criada (valor de `aws_servicecatalogappregistry_application.app_catalog.application_tag`). |
+
+Boas práticas
+- Use o AppRegistry para centralizar metadados do seu projeto e facilitar governança e inventário.
+- Garanta que tags e nomes sejam consistentes entre módulos para facilitar buscas e auditoria.
+
+Comandos úteis
+
+```bash
+terraform init
+terraform validate
+terraform plan -var-file=env/dev.tfvars
+```
+

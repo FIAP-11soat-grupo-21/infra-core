@@ -3,7 +3,6 @@ variable "user_pool_name" {
   type        = string
 }
 
-
 variable "project_name" {
   description = "Nome do projeto"
   type        = string
