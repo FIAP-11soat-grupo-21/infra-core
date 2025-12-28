@@ -3,11 +3,6 @@ variable "user_pool_name" {
   type        = string
 }
 
-variable "project_name" {
-  description = "Nome do projeto"
-  type        = string
-}
-
 variable "allow_admin_create_user_only" {
   description = "Booleano indicando se permite apenas criação de usuário por admin"
   type        = bool

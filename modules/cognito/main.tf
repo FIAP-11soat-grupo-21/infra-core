@@ -43,13 +43,7 @@ resource "aws_cognito_user_pool" "main" {
     }
   }
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = var.user_pool_name
-      Project = var.project_name
-    }
-  )
+  tags = var.tags
 }
 
 resource "aws_cognito_user_pool_client" "main" {
