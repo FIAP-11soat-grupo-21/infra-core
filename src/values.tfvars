@@ -28,3 +28,13 @@ db_storage_type      = "gp2"
 db_engine_version    = "18"
 db_instance_class    = "db.t3.micro"
 db_username          = "adminuser"
+
+# Cognito Variables
+cognito_user_pool_name   = "restaurant-clients"
+auto_verified_attributes = ["email"]
+email_required           = true
+name_required            = true
+generate_secret          = true
+access_token_validity    = 60
+id_token_validity        = 60
+refresh_token_validity   = 30

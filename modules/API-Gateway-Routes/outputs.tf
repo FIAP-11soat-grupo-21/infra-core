@@ -27,5 +27,5 @@ output "authorizer_id" {
   description = "ID do autorizador JWT criado (string vazia se não criado)."
   # O módulo não cria o autorizador por padrão. Retornamos string vazia para evitar referências
   # a recursos inexistentes.
-  value       = ""
+  value = ""
 }

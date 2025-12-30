@@ -10,5 +10,5 @@ output "api_gateway_arn" {
 
 output "vpc_link_id" {
   description = "ID do VPC Link da API Gateway V2"
-  value = aws_apigatewayv2_vpc_link.vpc_link.id
+  value       = aws_apigatewayv2_vpc_link.vpc_link.id
 }

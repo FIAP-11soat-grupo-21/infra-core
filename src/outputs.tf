@@ -96,3 +96,24 @@ output "api_gateway_arn" {
   description = "ARN da API Gateway"
   value       = module.api_gateway.api_gateway_arn
 }
+
+output "cognito_user_pool_id" {
+  description = "ID do Cognito User Pool"
+  value       = module.cognito.user_pool_id
+}
+
+output "cognito_user_pool_arn" {
+  description = "ARN do Cognito User Pool"
+  value       = module.cognito.user_pool_arn
+}
+
+output "cognito_user_pool_client_id" {
+  description = "ID do Cognito User Pool Client"
+  value       = module.cognito.user_pool_client_id
+}
+
+output "cognito_user_pool_client_secret" {
+  description = "Secret do Cognito User Pool Client (Traditional Web App)"
+  value       = module.cognito.user_pool_client_secret
+  sensitive   = true
+}

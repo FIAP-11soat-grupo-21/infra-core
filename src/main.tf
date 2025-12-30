@@ -42,9 +42,9 @@ module "ecs_cluster" {
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
-  project_name             = var.project_name
-  vpc_id                   = module.vcp.vpc_id
-  private_subnet_ids       = module.vcp.private_subnets
+  project_name       = var.project_name
+  vpc_id             = module.vcp.vpc_id
+  private_subnet_ids = module.vcp.private_subnets
 }
 
 module "alb" {
@@ -69,4 +69,21 @@ module "api_gateway" {
   api_name              = var.gwapi_name
   gwapi_auto_deploy     = true
   stage_name            = "v1"
+}
+
+module "cognito" {
+  source = "../modules/cognito"
+
+  user_pool_name               = var.cognito_user_pool_name
+  allow_admin_create_user_only = var.allow_admin_create_user_only
+  auto_verified_attributes     = var.auto_verified_attributes
+  username_attributes          = var.username_attributes
+  email_required               = var.email_required
+  name_required                = var.name_required
+  generate_secret              = var.generate_secret
+  access_token_validity        = var.access_token_validity
+  id_token_validity            = var.id_token_validity
+  refresh_token_validity       = var.refresh_token_validity
+
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
