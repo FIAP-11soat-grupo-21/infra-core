@@ -17,7 +17,7 @@ variable "app_port" {
 variable "health_check_path" {
   description = "Caminho usado para health check no target group do ALB"
   type        = string
-  default     = "/"
+  default     = "/health"
 }
 
 variable "project_common_tags" {
