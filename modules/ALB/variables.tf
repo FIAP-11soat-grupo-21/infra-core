@@ -8,6 +8,18 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "app_port_init_range" {
+  description = "Porta de incío do range onde a aplicação está escutando"
+  type        = number
+  default     = 80
+}
+
+variable "app_port_end_range" {
+  description = "Porta de fim do range onde a aplicação está escutando"
+  type        = number
+  default     = 80
+}
+
 variable "app_port" {
   description = "Porta onde a aplicação está escutando"
   type        = number

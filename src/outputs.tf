@@ -55,7 +55,7 @@ output "alb_target_group_arn" {
 
 output "alb_arn" {
   description = "ARN do ALB"
-  value = module.alb.alb_arn
+  value       = module.alb.alb_arn
 }
 
 output "alb_security_group_id" {

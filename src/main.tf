@@ -52,10 +52,12 @@ module "alb" {
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 
-  vpc_id             = module.vcp.vpc_id
-  private_subnet_ids = module.vcp.private_subnets
-  loadbalancer_name  = var.lb_name
-  is_internal        = true
+  vpc_id              = module.vcp.vpc_id
+  private_subnet_ids  = module.vcp.private_subnets
+  loadbalancer_name   = var.lb_name
+  is_internal         = true
+  app_port_init_range = 8080
+  app_port_end_range  = 8090
 }
 
 module "api_gateway" {

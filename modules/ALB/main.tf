@@ -13,8 +13,8 @@ resource "aws_security_group" "alb_sg" {
 
   ingress {
     description = "Allow HTTP from VPC (adjust as needed for VPC Link ENIs)"
-    from_port   = var.app_port
-    to_port     = var.app_port
+    from_port   = var.app_port_init_range
+    to_port     = var.app_port_end_range
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
