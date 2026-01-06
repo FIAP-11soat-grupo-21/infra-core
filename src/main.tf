@@ -89,3 +89,20 @@ module "cognito" {
 
   tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
+
+module "RDS" {
+  source               = "../modules/RDS"
+  project_common_tags  = { Project =  var.project_name}
+  app_name             = "${var.project_name}-${var.db_engine}-db"
+  db_port              = var.db_port
+  db_allocated_storage = var.db_allocated_storage
+  db_storage_type      = "gp2"
+  db_engine            = var.db_engine
+  db_engine_version    = var.db_engine_version
+  db_instance_class    = var.db_instance_class
+  db_username          = var.db_username
+
+  private_subnets = module.vcp.private_subnets
+  vpc_id          = module.vcp.vpc_id
+}
+

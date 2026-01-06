@@ -92,6 +92,14 @@ output "rds_postgres_db_username" {
   value       = var.db_username
 }
 
+output "rds_address" {
+  value = module.RDS.db_connection
+}
+
+output "rds_secret_arn" {
+  value = module.RDS.db_secret_password_arn
+}
+
 output "ecr_registry_credentials_arn" {
   description = "Credencial do GHCR"
   value       = module.ghcr_secret.secret_arn
