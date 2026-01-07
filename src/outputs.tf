@@ -67,6 +67,11 @@ output "alb_listener_arn" {
   value = module.alb.listener_arn
 }
 
+output "alb_dns_name" {
+  description = "DNS name do ALB"
+  value       = module.alb.alb_dns_name
+}
+
 output "api_gateway_id" {
   description = "ID da API Gateway (v2)"
   value       = module.api_gateway.api_id

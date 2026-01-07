@@ -92,7 +92,7 @@ module "cognito" {
 
 module "RDS" {
   source               = "../modules/RDS"
-  project_common_tags  = { Project =  var.project_name}
+  project_common_tags  = { Project = var.project_name }
   app_name             = "${var.project_name}-${var.db_engine}-db"
   db_port              = var.db_port
   db_allocated_storage = var.db_allocated_storage
