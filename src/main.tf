@@ -106,3 +106,44 @@ module "RDS" {
   vpc_id          = module.vcp.vpc_id
 }
 
+resource "aws_sns_topic" "this" {
+  name = "order-error-topic"
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
+module "sqs_kitchen_orders" {
+  source = "../modules/SQS"
+
+  queue_name                 = "kitchen-order-api-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
+module "sqs_orders" {
+  source = "../modules/SQS"
+
+  queue_name                 = "order-api-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
+module "sqs_payments" {
+  source = "../modules/SQS"
+
+  queue_name                 = "payment-api-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
