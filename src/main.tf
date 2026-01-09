@@ -123,10 +123,34 @@ module "sqs_kitchen_orders" {
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
+module "sqs_kitchen_orders_order_error" {
+  source = "../modules/SQS"
+
+  queue_name                 = "kitchen-order-api-order-error-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
 module "sqs_orders" {
   source = "../modules/SQS"
 
   queue_name                 = "order-api-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}
+
+module "sqs_orders_order_error" {
+  source = "../modules/SQS"
+
+  queue_name                 = "order-api-order-error-queue"
   delay_seconds              = 0
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
@@ -147,3 +171,14 @@ module "sqs_payments" {
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
+module "sqs_payments_order_error" {
+  source = "../modules/SQS"
+
+  queue_name                 = "payment-api-order-error-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+}

@@ -135,3 +135,27 @@ output "cognito_user_pool_client_secret" {
   value       = module.cognito.user_pool_client_secret
   sensitive   = true
 }
+
+output "sqs_kitchen_orders_queue_url" {
+  value = module.sqs_kitchen_orders.sqs_queue_url
+}
+
+output "sqs_kitchen_orders_order_error_queue_url" {
+  value = module.sqs_kitchen_orders_order_error.sqs_queue_url
+}
+
+output "sqs_orders_queue_url" {
+  value = module.sqs_orders.sqs_queue_url
+}
+
+output "sqs_orders_order_error_queue_url" {
+  value = module.sqs_orders_order_error.sqs_queue_url
+}
+
+output "sqs_payments_queue_url" {
+  value = module.sqs_payments.sqs_queue_url
+}
+
+output "sqs_payments_order_error_queue_url" {
+  value = module.sqs_payments_order_error.sqs_queue_url
+}
