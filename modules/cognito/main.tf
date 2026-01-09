@@ -47,7 +47,43 @@ resource "aws_cognito_user_pool" "main" {
 }
 
 resource "aws_cognito_user_pool_client" "main" {
-  name         = "${var.user_pool_name}-client"
+  name         = "${var.user_pool_name}-customer"
+  user_pool_id = aws_cognito_user_pool.main.id
+
+  generate_secret               = var.generate_secret
+  prevent_user_existence_errors = "ENABLED"
+
+  access_token_validity  = var.access_token_validity
+  id_token_validity      = var.id_token_validity
+  refresh_token_validity = var.refresh_token_validity
+
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes"
+    refresh_token = "days"
+  }
+
+  read_attributes = [
+    "email",
+    "name",
+    "email_verified"
+  ]
+
+  write_attributes = [
+    "email",
+    "name"
+  ]
+
+  explicit_auth_flows = [
+    "ALLOW_USER_SRP_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_ADMIN_USER_PASSWORD_AUTH"
+  ]
+}
+
+resource "aws_cognito_user_pool_client" "main" {
+  name         = "${var.user_pool_name}-admin"
   user_pool_id = aws_cognito_user_pool.main.id
 
   generate_secret               = var.generate_secret
