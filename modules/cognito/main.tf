@@ -46,7 +46,7 @@ resource "aws_cognito_user_pool" "main" {
   tags = var.tags
 }
 
-resource "aws_cognito_user_pool_client" "main" {
+resource "aws_cognito_user_pool_client" "customer" {
   name         = "${var.user_pool_name}-customer"
   user_pool_id = aws_cognito_user_pool.main.id
 
@@ -82,7 +82,7 @@ resource "aws_cognito_user_pool_client" "main" {
   ]
 }
 
-resource "aws_cognito_user_pool_client" "main" {
+resource "aws_cognito_user_pool_client" "admin" {
   name         = "${var.user_pool_name}-admin"
   user_pool_id = aws_cognito_user_pool.main.id
 
