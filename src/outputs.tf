@@ -137,25 +137,26 @@ output "cognito_user_pool_client_secret" {
 }
 
 output "sqs_kitchen_orders_queue_url" {
-  value = module.sqs_kitchen_orders.sqs_queue_url
+  value = aws_sqs_queue.sqs_kitchen_orders.url
 }
 
+
 output "sqs_kitchen_orders_order_error_queue_url" {
-  value = module.sqs_kitchen_orders_order_error.sqs_queue_url
+  value = aws_sqs_queue.sqs_kitchen_orders_order_error.url
 }
 
 output "sqs_orders_queue_url" {
-  value = module.sqs_orders.sqs_queue_url
+  value = aws_sqs_queue.sqs_orders.url
 }
 
 output "sqs_orders_order_error_queue_url" {
-  value = module.sqs_orders_order_error.sqs_queue_url
+  value = aws_sqs_queue.sqs_orders_order_error.url
 }
 
 output "sqs_payments_queue_url" {
-  value = module.sqs_payments.sqs_queue_url
+  value = aws_sqs_queue.sqs_payments.url
 }
 
 output "sqs_payments_order_error_queue_url" {
-  value = module.sqs_payments_order_error.sqs_queue_url
+  value = aws_sqs_queue.sqs_payments_order_error.url
 }

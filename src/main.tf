@@ -111,74 +111,155 @@ resource "aws_sns_topic" "this" {
   tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-module "sqs_kitchen_orders" {
-  source = "../modules/SQS"
+resource "aws_sqs_queue" "sqs_kitchen_orders" {
+  depends_on = [aws_sqs_queue.sqs_kitchen_orders_dead_letter]
 
-  queue_name                 = "kitchen-order-api-queue"
+  name                       = "kitchen-order-api-queue"
   delay_seconds              = 0
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
 
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.sqs_kitchen_orders_dead_letter.arn
+    maxReceiveCount     = 4
+  })
+
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-kitchen-order-api-queue"
+    }
+  )
 }
 
-module "sqs_kitchen_orders_order_error" {
-  source = "../modules/SQS"
+resource "aws_sqs_queue" "sqs_kitchen_orders_dead_letter" {
+  name                      = "sqs-kitchen-order-api-dead-letter"
+  message_retention_seconds = 1209600 # 14 days
 
-  queue_name                 = "kitchen-order-api-order-error-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-kitchen-order-api-dead-letter"
+    }
+  )
 }
 
-module "sqs_orders" {
-  source = "../modules/SQS"
-
-  queue_name                 = "order-api-queue"
+resource "aws_sqs_queue" "sqs_kitchen_orders_order_error" {
+  name                       = "kitchen-order-api-order-error-queue"
   delay_seconds              = 0
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-kitchen-order-api-order-error-queue"
+    }
+  )
 }
 
-module "sqs_orders_order_error" {
-  source = "../modules/SQS"
+resource "aws_sqs_queue" "sqs_orders" {
+  depends_on = [aws_sqs_queue.sqs_orders_dead_letter]
 
-  queue_name                 = "order-api-order-error-queue"
+  name                       = "order-api-queue"
   delay_seconds              = 0
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
 
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.sqs_orders_dead_letter.arn
+    maxReceiveCount     = 4
+  })
+
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-order-api-queue"
+    }
+  )
 }
 
-module "sqs_payments" {
-  source = "../modules/SQS"
+resource "aws_sqs_queue" "sqs_orders_dead_letter" {
+  name                      = "sqs-order-api-dead-letter"
+  message_retention_seconds = 1209600 # 14 days
 
-  queue_name                 = "payment-api-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-order-api-dead-letter"
+    }
+  )
 }
 
-module "sqs_payments_order_error" {
-  source = "../modules/SQS"
+resource "aws_sqs_queue" "sqs_orders_order_error" {
+  name                       = "order-api-order-error-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-order-api-order-error-queue"
+    }
+  )
+}
 
-  queue_name                 = "payment-api-order-error-queue"
+resource "aws_sqs_queue" "sqs_payments" {
+  depends_on = [aws_sqs_queue.sqs_payments_dead_letter]
+
+  name                       = "payment-api-queue"
   delay_seconds              = 0
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
 
-  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.sqs_payments_dead_letter.arn
+    maxReceiveCount     = 4
+  })
+
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-payment-api-queue"
+    }
+  )
+}
+
+resource "aws_sqs_queue" "sqs_payments_dead_letter" {
+  name                      = "sqs-payment-api-dead-letter"
+  message_retention_seconds = 1209600 # 14 days
+
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-order-api-dead-letter"
+    }
+  )
+}
+
+resource "aws_sqs_queue" "sqs_payments_order_error" {
+  name                       = "payment-api-order-error-queue"
+  delay_seconds              = 0
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
+  visibility_timeout_seconds = 30
+  tags = merge(
+    local.project_common_tags, 
+    module.application_registry.app_registry_application_tag, 
+    {
+      Name = "sqs-payment-api-order-error-queue"
+    }
+  )
 }
