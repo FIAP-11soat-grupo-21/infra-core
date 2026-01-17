@@ -24,3 +24,24 @@ resource "aws_sqs_queue" "dead_letter" {
     Name = "sqs-${var.queue_name}-dead-letter"
   })
 }
+
+resource "aws_sqs_queue_policy" "from_allowed_sns" {
+  count     = length(var.allowed_sns_topic_arns) > 0 ? 1 : 0
+  queue_url = aws_sqs_queue.main.url
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "Allow-SNS-SendMessage"
+        Effect = "Allow"
+        Principal = { AWS = "*" }
+        Action = "SQS:SendMessage"
+        Resource = aws_sqs_queue.main.arn
+        Condition = {
+          ArnEquals = { "aws:SourceArn" = var.allowed_sns_topic_arns }
+        }
+      }
+    ]
+  })
+}

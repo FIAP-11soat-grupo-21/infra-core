@@ -137,26 +137,49 @@ output "cognito_user_pool_client_secret" {
 }
 
 output "sqs_kitchen_orders_queue_url" {
-  value = aws_sqs_queue.sqs_kitchen_orders.url
+  value = module.sqs_create_kitchen_order.sqs_queue_url
 }
 
+output "sqs_kitchen_orders_queue_arn" {
+  value = module.sqs_create_kitchen_order.sqs_queue_arn
+}
 
 output "sqs_kitchen_orders_order_error_queue_url" {
-  value = aws_sqs_queue.sqs_kitchen_orders_order_error.url
+  value = module.sqs_kitchen-order-order-error.sqs_queue_url
+}
+
+output "sqs_kitchen_orders_order_error_queue_arn" {
+  value = module.sqs_kitchen-order-order-error.sqs_queue_arn
 }
 
 output "sqs_orders_queue_url" {
-  value = aws_sqs_queue.sqs_orders.url
+  value = module.sqs_update_order_status.sqs_queue_url
+}
+
+output "sqs_orders_queue_arn" {
+  value = module.sqs_update_order_status.sqs_queue_arn
 }
 
 output "sqs_orders_order_error_queue_url" {
-  value = aws_sqs_queue.sqs_orders_order_error.url
+  value = module.sqs_order_error.sqs_queue_url
+}
+
+output "sqs_orders_order_error_queue_arn" {
+  value = module.sqs_order_error.sqs_queue_arn
 }
 
 output "sqs_payments_queue_url" {
-  value = aws_sqs_queue.sqs_payments.url
+  value = module.sqs_create_payment.sqs_queue_url
+}
+
+output "sqs_payments_queue_arn" {
+  value = module.sqs_create_payment.sqs_queue_arn
 }
 
 output "sqs_payments_order_error_queue_url" {
-  value = aws_sqs_queue.sqs_payments_order_error.url
+  value = module.sqs_payment-order-error.sqs_queue_url
+}
+
+output "sqs_payments_order_error_queue_arn" {
+  value = module.sqs_payment-order-error.sqs_queue_arn
 }

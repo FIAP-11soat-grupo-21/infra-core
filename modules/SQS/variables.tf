@@ -34,4 +34,8 @@ variable "project_common_tags" {
   default     = {}
 }
 
-
+variable "allowed_sns_topic_arns" {
+  description = "List of SNS Topic ARNs that are allowed to send messages to this queue. If empty, no policy is attached."
+  type        = list(string)
+  default     = []
+}

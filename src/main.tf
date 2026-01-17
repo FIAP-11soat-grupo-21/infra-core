@@ -106,160 +106,124 @@ module "RDS" {
   vpc_id          = module.vcp.vpc_id
 }
 
-resource "aws_sns_topic" "this" {
-  name = "order-error-topic"
+resource "aws_sns_topic" "order_error_topic" {
+  name = "order-error"
   tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-resource "aws_sqs_queue" "sqs_kitchen_orders" {
-  depends_on = [aws_sqs_queue.sqs_kitchen_orders_dead_letter]
-
-  name                       = "kitchen-order-api-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.sqs_kitchen_orders_dead_letter.arn
-    maxReceiveCount     = 4
-  })
-
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-kitchen-order-api-queue"
-    }
-  )
+resource "aws_sns_topic" "order_status_topic" {
+  name = "order-status"
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-resource "aws_sqs_queue" "sqs_kitchen_orders_dead_letter" {
-  name                      = "sqs-kitchen-order-api-dead-letter"
-  message_retention_seconds = 1209600 # 14 days
-
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-kitchen-order-api-dead-letter"
-    }
-  )
+resource "aws_sns_topic" "payment_processed_topic" {
+  name = "payment-processed"
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-resource "aws_sqs_queue" "sqs_kitchen_orders_order_error" {
-  name                       = "kitchen-order-api-order-error-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-kitchen-order-api-order-error-queue"
-    }
-  )
+resource "aws_sns_topic" "kitchen_order_topic" {
+  name = "kitchen-order-finished"
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-resource "aws_sqs_queue" "sqs_orders" {
-  depends_on = [aws_sqs_queue.sqs_orders_dead_letter]
-
-  name                       = "order-api-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.sqs_orders_dead_letter.arn
-    maxReceiveCount     = 4
-  })
-
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-order-api-queue"
-    }
-  )
+resource "aws_sns_topic" "order_created_topic" {
+  name = "order-created"
+  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
 
-resource "aws_sqs_queue" "sqs_orders_dead_letter" {
-  name                      = "sqs-order-api-dead-letter"
-  message_retention_seconds = 1209600 # 14 days
+module "sqs_create_payment" {
+  source = "../modules/SQS"
 
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-order-api-dead-letter"
-    }
-  )
+  queue_name             = "create-payment-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.order_created_topic.arn]
 }
 
-resource "aws_sqs_queue" "sqs_orders_order_error" {
-  name                       = "order-api-order-error-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-order-api-order-error-queue"
-    }
-  )
+module "sqs_create_kitchen_order" {
+  source = "../modules/SQS"
+
+  queue_name             = "create-kitchen-order-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.payment_processed_topic.arn]
 }
 
-resource "aws_sqs_queue" "sqs_payments" {
-  depends_on = [aws_sqs_queue.sqs_payments_dead_letter]
+module "sqs_update_order_status" {
+  source = "../modules/SQS"
 
-  name                       = "payment-api-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.sqs_payments_dead_letter.arn
-    maxReceiveCount     = 4
-  })
-
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-payment-api-queue"
-    }
-  )
+  queue_name             = "update-order-status-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.payment_processed_topic.arn, aws_sns_topic.kitchen_order_topic.arn]
 }
 
-resource "aws_sqs_queue" "sqs_payments_dead_letter" {
-  name                      = "sqs-payment-api-dead-letter"
-  message_retention_seconds = 1209600 # 14 days
+module "sqs_order_error" {
+  source = "../modules/SQS"
 
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-order-api-dead-letter"
-    }
-  )
+  queue_name             = "order-order-error-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
 }
 
-resource "aws_sqs_queue" "sqs_payments_order_error" {
-  name                       = "payment-api-order-error-queue"
-  delay_seconds              = 0
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 10
-  visibility_timeout_seconds = 30
-  tags = merge(
-    local.project_common_tags, 
-    module.application_registry.app_registry_application_tag, 
-    {
-      Name = "sqs-payment-api-order-error-queue"
-    }
-  )
+module "sqs_kitchen-order-order-error" {
+  source = "../modules/SQS"
+
+  queue_name             = "kitchen-order-order-error-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
+}
+
+module "sqs_payment-order-error" {
+  source = "../modules/SQS"
+
+  queue_name             = "payment-order-error-queue"
+  project_common_tags    = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+  allowed_sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
+}
+
+resource "aws_sns_topic_subscription" "order_created_to_create_payment" {
+  topic_arn  = aws_sns_topic.order_created_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_create_payment.sqs_queue_arn
+  depends_on = [module.sqs_create_payment]
+}
+
+resource "aws_sns_topic_subscription" "payment_processed_to_create_kitchen_order" {
+  topic_arn  = aws_sns_topic.payment_processed_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_create_kitchen_order.sqs_queue_arn
+  depends_on = [module.sqs_create_kitchen_order]
+}
+
+resource "aws_sns_topic_subscription" "payment_processed_to_update_order_status" {
+  topic_arn  = aws_sns_topic.payment_processed_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_update_order_status.sqs_queue_arn
+  depends_on = [module.sqs_update_order_status]
+}
+
+resource "aws_sns_topic_subscription" "kitchen_order_to_update_order_status" {
+  topic_arn  = aws_sns_topic.kitchen_order_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_update_order_status.sqs_queue_arn
+  depends_on = [module.sqs_update_order_status]
+}
+
+resource "aws_sns_topic_subscription" "order_error_to_order_error_queue" {
+  topic_arn  = aws_sns_topic.order_error_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_order_error.sqs_queue_arn
+  depends_on = [module.sqs_order_error]
+}
+
+resource "aws_sns_topic_subscription" "order_error_to_kitchen_order_error_queue" {
+  topic_arn  = aws_sns_topic.order_error_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_kitchen-order-order-error.sqs_queue_arn
+  depends_on = [module.sqs_kitchen-order-order-error]
+}
+
+resource "aws_sns_topic_subscription" "order_error_to_payment_order_error_queue" {
+  topic_arn  = aws_sns_topic.order_error_topic.arn
+  protocol   = "sqs"
+  endpoint   = module.sqs_payment-order-error.sqs_queue_arn
+  depends_on = [module.sqs_payment-order-error]
 }
