@@ -34,4 +34,10 @@ variable "project_common_tags" {
   default     = {}
 }
 
+variable "sns_topic_arns" {
+  description = "Optional list of SNS topic ARNs that should deliver messages to this queue."
+  type        = list(string)
+  default     = []
+}
+
 

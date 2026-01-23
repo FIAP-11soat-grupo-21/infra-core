@@ -159,3 +159,19 @@ output "sqs_payments_queue_url" {
 output "sqs_payments_order_error_queue_url" {
   value = module.sqs_payments_order_error.sqs_queue_url
 }
+
+output "sns_order_error_topic_arn" {
+  value = aws_sns_topic.order_error_topic.arn
+}
+
+output "sns_order_created_topic_arn" {
+  value = aws_sns_topic.order_created_topic.arn
+}
+
+output "sns_payment_processed_topic_arn" {
+  value = aws_sns_topic.payment_processed_topic.arn
+}
+
+output "sns_kitchen_order_finished_topic_arn" {
+  value = aws_sns_topic.kitchen_order_finished_topic.arn
+}
