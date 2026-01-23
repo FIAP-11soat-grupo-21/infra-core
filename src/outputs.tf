@@ -141,6 +141,28 @@ output "cognito_user_pool_client_secret" {
   sensitive   = true
 }
 
+
+output "cognito_admin_user_pool_id" {
+  description = "ID do Cognito User Pool"
+  value       = module.cognito.admin_user_pool_id
+}
+
+output "cognito_admin_user_pool_arn" {
+  description = "ARN do Cognito User Pool"
+  value       = module.cognito.admin_user_pool_arn
+}
+
+output "cognito_admin_user_pool_client_id" {
+  description = "ID do Cognito User Pool Client"
+  value       = module.cognito.user_pool_client_admin_id
+}
+
+output "cognito_admin_user_pool_client_secret" {
+  description = "Secret do Cognito User Pool Client (Traditional Web App)"
+  value       = module.cognito.user_pool_client_admin_secret
+  sensitive   = true
+}
+
 output "sqs_kitchen_orders_queue_url" {
   value = module.sqs_kitchen_orders.sqs_queue_url
 }

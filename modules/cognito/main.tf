@@ -116,7 +116,7 @@ resource "aws_cognito_user_pool_client" "customer" {
 
 resource "aws_cognito_user_pool_client" "admin" {
   name         = "${var.user_pool_name}-admin"
-  user_pool_id = aws_cognito_user_pool.main.id
+  user_pool_id = aws_cognito_user_pool.admin.id
 
   generate_secret               = var.generate_secret
   prevent_user_existence_errors = "ENABLED"

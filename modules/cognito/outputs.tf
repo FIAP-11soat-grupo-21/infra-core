@@ -19,6 +19,16 @@ output "user_pool_client_secret" {
   sensitive   = true
 }
 
+output "admin_user_pool_id" {
+  description = "ID do Cognito User Pool"
+  value       = aws_cognito_user_pool.admin.id
+}
+
+output "admin_user_pool_arn" {
+  description = "ARN do Cognito User Pool"
+  value       = aws_cognito_user_pool.admin.arn
+}
+
 output "user_pool_client_admin_id" {
   description = "ID do Cognito User Pool Client - ADMIN"
   value       = aws_cognito_user_pool_client.admin.id
