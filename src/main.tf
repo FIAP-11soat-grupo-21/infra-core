@@ -134,7 +134,7 @@ module "sqs_kitchen_orders" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns = [aws_sns_topic.payment_processed_topic.arn]
+  sns_topic_arns             = [aws_sns_topic.payment_processed_topic.arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -147,7 +147,7 @@ module "sqs_kitchen_orders_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -160,9 +160,9 @@ module "sqs_orders" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  
+
   sns_topic_arns = [
-    aws_sns_topic.kitchen_order_finished_topic.arn, 
+    aws_sns_topic.kitchen_order_finished_topic.arn,
     aws_sns_topic.payment_processed_topic.arn
   ]
 
@@ -177,7 +177,7 @@ module "sqs_orders_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -203,7 +203,7 @@ module "sqs_payments_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
