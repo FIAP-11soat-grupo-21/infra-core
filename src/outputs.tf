@@ -115,6 +115,11 @@ output "api_gateway_arn" {
   value       = module.api_gateway.api_gateway_arn
 }
 
+output "api_gateway_url" {
+  description = "URL do API Gateway (invoke URL com stage)"
+  value       = module.api_gateway.api_invoke_url
+}
+
 output "cognito_user_pool_id" {
   description = "ID do Cognito User Pool"
   value       = module.cognito.user_pool_id
