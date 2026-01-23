@@ -7,6 +7,38 @@ resource "aws_cognito_user_pool" "main" {
   name                     = var.user_pool_name
   auto_verified_attributes = var.auto_verified_attributes
   username_attributes      = var.username_attributes
+
+  schema {
+    name                = "email"
+    attribute_data_type = "String"
+    mutable             = true
+    required            = var.email_required
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 256
+    }
+  }
+
+  schema {
+    name                = "name"
+    attribute_data_type = "String"
+    mutable             = true
+    required            = var.name_required
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 256
+    }
+  }
+
+  tags = var.tags
+}
+
+resource "aws_cognito_user_pool" "admin" {
+  name                     = "${var.user_pool_name}-admins"
+  auto_verified_attributes = var.auto_verified_attributes
+  username_attributes      = var.username_attributes
   admin_create_user_config {
     allow_admin_create_user_only = var.allow_admin_create_user_only
 
