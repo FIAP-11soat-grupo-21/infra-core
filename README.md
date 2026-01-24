@@ -142,3 +142,23 @@ O projeto em questão utiliza dos módulos construidos neste respositório e rea
 
 Para detalhes e nomes exatos dos recursos criados, consulte os README específicos em cada pasta de módulo dentro de `modules/`.
 
+### Implantação do projeto
+
+Para a implantação do projeto, em conjunto aos microserviços, siga os passos abaixo:
+1. Execute o pipeline de implantação: [Deploy Infra](./pipelines/deploy-infra.yml) para provisionar a infraestrutura necessária.
+2. Após a implantação da infraestrutura, execute o pipeline de implantação da function de auth contida em [Deploy Auth Function](https://github.com/FIAP-11soat-grupo-21/app-function-auth).
+3. Em seguida, execute o pipeline de implantação do microserviço em cada um de seus respectivos repositórios:
+   - [Deploy Customer](https://github.com/FIAP-11soat-grupo-21/api-microservice-customer)
+   - [Deploy Order](https://github.com/FIAP-11soat-grupo-21/api-microservice-orders)
+   - [Deploy Catalog](https://github.com/FIAP-11soat-grupo-21/api-microservice-catalog)
+   - [Deploy Payment](https://github.com/FIAP-11soat-grupo-21/api-microservice-payment)
+   - [Deploy kitchenOrder](https://github.com/FIAP-11soat-grupo-21/api-microservice-kitchen-order)
+4. Após esses passos, a infraestrutura e os microserviços estarão implantados e prontos para uso.
+
+### Validação de cobertura de teste
+Para validar a cobertura de testes utilizamos os sonnarqube:
+- https://sonarcloud.io/project/overview?id=FIAP-11soat-grupo-21_api-microservice-catalog
+- https://sonarcloud.io/project/overview?id=FIAP-11soat-grupo-21_api-microservice-customer
+- https://sonarcloud.io/project/overview?id=FIAP-11soat-grupo-21_api-microservice-kitchen-order
+- https://sonarcloud.io/project/overview?id=FIAP-11soat-grupo-21_api-microservice-orders
+- https://sonarcloud.io/project/overview?id=FIAP-11soat-grupo-21_api-microservice-payment
