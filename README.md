@@ -118,16 +118,27 @@ resource "aws_lambda_permission" "apigw" {
 }
 ```
 
-Boas práticas específicas para Lambda:
-- Use versionamento e aliases (por exemplo `prod` alias) e faça deploy canary/linear quando possível.
-- Separe código e infra: empacote o artefato em CI e só referencie no Terraform (evite empacotar diretamente no repositório se for grande).
-- Defina timeouts e limites de memória adequados, e configure alarmes para erros e latência.
-- Use variáveis de ambiente para configuração e Secrets Manager para segredos.
+## Estrutura criada para o projeto
 
+O projeto em questão utiliza dos módulos construidos neste respositório e realiza a implantação da estrutura disposta na imagem:
 
-## Próximos passos recomendados
+![image](./docs/diagram.png)
 
-- Criar/atualizar `modules/*/README.md` com entradas/saídas e exemplos de uso.
-- Adicionar checagens automáticas (`terraform fmt`, `terraform validate`) no pipeline CI.
-- Implementar backend remoto (S3+DynamoDB) e políticas de locking para o estado.
-- Se quiser, eu posso gerar templates de `README.md` para cada módulo automaticamente a partir dos `variables.tf` e `outputs.tf` — quer que eu gere isso agora?
+**Recursos Terraform Criados**
+
+- **VPC**: VPC, subnets, route tables, Internet Gateway, NAT Gateway e Security Groups para isolamento e roteamento da rede.
+- **ALB**: Application Load Balancer (aws_lb), listeners, target groups e listener rules para rotear tráfego para serviços.
+- **API-Gateway / API-Gateway-Routes**: APIs (AWS API Gateway v2/v1), rotas, integrações, stages e, se aplicável, VPC Link para integração privada.
+- **ECS-Cluster / ECS-Service**: ECS Cluster, Task Definitions, ECS Services, Target Groups/attachments e configurações de auto-scaling e logs (CloudWatch).
+- **Lambda**: Funções Lambda, roles/policies IAM, versões/aliases e permissões para invocação pelo API Gateway ou outros serviços.
+- **RDS**: Instâncias/Clusters RDS, subnet groups e configurações associadas (parameter groups, security groups).
+- **Dynamo**: Tabelas DynamoDB para armazenamento NoSQL e índices secundários quando necessários.
+- **S3**: Buckets S3 para artefatos, armazenamentos e logs, com políticas e regras de ciclo de vida.
+- **SQS**: Filas SQS para enfileiramento assíncrono de mensagens.
+- **Cognito**: User Pools / Identity Pools do Cognito para autenticação e autorização de APIs/usuários.
+- **SM**: Secrets Manager para armazenar segredos e credenciais de forma segura.
+- **APP-Registry**: Recursos relacionados ao registro de aplicações e repositórios de artefatos (ex.: AppRegistry, ECR), conforme implementado no módulo correspondente.
+- **Configuração raiz (`src`)**: Providers, backend, variáveis e outputs que orquestram e conectam os módulos acima.
+
+Para detalhes e nomes exatos dos recursos criados, consulte os README específicos em cada pasta de módulo dentro de `modules/`.
+
