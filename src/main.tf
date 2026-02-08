@@ -106,24 +106,44 @@ module "RDS" {
   vpc_id          = module.vcp.vpc_id
 }
 
-resource "aws_sns_topic" "order_error_topic" {
-  name = "order-error-topic"
-  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+module "sns_order_error" {
+  source = "../modules/SNS"
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+
+  topic = {
+    name = "order-error-topic"
+  }
 }
 
-resource "aws_sns_topic" "order_created_topic" {
-  name = "order-created-topic"
-  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+module "sns_order_created" {
+  source = "../modules/SNS"
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+
+  topic = {
+    name = "order-created-topic"
+  }
 }
 
-resource "aws_sns_topic" "payment_processed_topic" {
-  name = "payment-processed-topic"
-  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+module "sns_payment_processed" {
+  source = "../modules/SNS"
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+
+  topic = {
+    name = "payment-processed-topic"
+  }
 }
 
-resource "aws_sns_topic" "kitchen_order_finished_topic" {
-  name = "kitchen-order-finished-topic"
-  tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+module "sns_kitchen_order_finished" {
+  source = "../modules/SNS"
+
+  project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
+
+  topic = {
+    name = "kitchen-order-finished-topic"
+  }
 }
 
 module "sqs_kitchen_orders" {
@@ -134,7 +154,7 @@ module "sqs_kitchen_orders" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns             = [aws_sns_topic.payment_processed_topic.arn]
+  sns_topic_arns             = [module.sns_payment_processed.topic_arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -147,7 +167,7 @@ module "sqs_kitchen_orders_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [module.sns_order_error.topic_arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -162,8 +182,8 @@ module "sqs_orders" {
   visibility_timeout_seconds = 30
 
   sns_topic_arns = [
-    aws_sns_topic.kitchen_order_finished_topic.arn,
-    aws_sns_topic.payment_processed_topic.arn
+    module.sns_kitchen_order_finished.topic_arn,
+    module.sns_payment_processed.topic_arn
   ]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
@@ -177,7 +197,7 @@ module "sqs_orders_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [module.sns_order_error.topic_arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -190,7 +210,7 @@ module "sqs_payments" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns             = [aws_sns_topic.order_created_topic.arn]
+  sns_topic_arns             = [module.sns_order_created.topic_arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
@@ -203,7 +223,7 @@ module "sqs_payments_order_error" {
   message_retention_seconds  = 86400
   receive_wait_time_seconds  = 10
   visibility_timeout_seconds = 30
-  sns_topic_arns             = [aws_sns_topic.order_error_topic.arn]
+  sns_topic_arns             = [module.sns_order_error.topic_arn]
 
   project_common_tags = merge(local.project_common_tags, module.application_registry.app_registry_application_tag)
 }
