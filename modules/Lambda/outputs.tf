@@ -8,3 +8,7 @@ output "vpc_subnet_ids" {
 output "lambda_integration_id" {
   value = aws_apigatewayv2_integration.lambda.id
 }
+
+output "lambda_name" {
+  value = aws_lambda_function.this.function_name
+}
