@@ -6,8 +6,8 @@ output "vpc_subnet_ids" {
 }
 
 output "lambda_integration_id" {
-  value = aws_apigatewayv2_integration.lambda[0].id
-  depends_on = [aws_apigatewayv2_integration.lambda]
+  value       = try(aws_apigatewayv2_integration.lambda[0].id, null)
+  depends_on  = [aws_apigatewayv2_integration.lambda]
 }
 
 output "lambda_name" {
