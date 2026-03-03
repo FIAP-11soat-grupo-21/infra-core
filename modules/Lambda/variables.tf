@@ -127,6 +127,7 @@ EOT
 variable "api_id" {
   description = "API Gateway v2 API id"
   type        = string
+  default     = null
 }
 
 variable "payload_format_version" {
