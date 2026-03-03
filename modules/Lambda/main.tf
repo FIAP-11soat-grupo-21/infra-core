@@ -110,6 +110,7 @@ resource "aws_security_group" "lambda_sg" {
 }
 
 resource "aws_lambda_permission" "apigw" {
+  count         = var.api_id != null && var.api_id != "" ? 1 : 0
   statement_id  = "AllowAPIGatewayInvoke-${var.lambda_name != "" ? var.lambda_name : substr(md5(aws_lambda_function.this.function_name), 0, 8)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
@@ -120,6 +121,7 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
+  count                  = var.api_id != null && var.api_id != "" ? 1 : 0
   api_id                 = var.api_id
   integration_type       = "AWS_PROXY"
   integration_uri        = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${aws_lambda_function.this.arn}/invocations"
