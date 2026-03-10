@@ -25,8 +25,6 @@ output "bucket_regional_domain_name" {
   value       = aws_s3_bucket.this.bucket_regional_domain_name
 }
 
-
-
 output "sqs_queue_policy_json" {
   description = "Política JSON para permitir que o S3 envie mensagens para uma fila SQS (use esta política no módulo SQS)"
   value       = var.enable_notifications && var.notification_queue_arn != "" ? data.aws_iam_policy_document.sqs_queue_policy[0].json : null

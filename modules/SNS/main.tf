@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 locals {
   // single topic configuration
   topic = var.topic
@@ -29,4 +31,31 @@ resource "aws_sns_topic_subscription" "this" {
   protocol             = lookup(each.value, "protocol", null)
   endpoint             = lookup(each.value, "endpoint", null)
   raw_message_delivery = lookup(each.value, "raw_message_delivery", false)
+}
+
+resource "aws_sns_topic_policy" "this" {
+  count  = var.allow_s3_publish ? 1 : 0
+  arn    = aws_sns_topic.this.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "s3.amazonaws.com"
+        }
+        Action = "SNS:Publish"
+        Resource = aws_sns_topic.this.arn
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+          ArnLike = {
+            "aws:SourceArn" = var.source_bucket_arn
+          }
+        }
+      }
+    ]
+  })
 }

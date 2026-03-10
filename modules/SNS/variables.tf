@@ -28,3 +28,15 @@ variable "project_common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "allow_s3_publish" {
+  description = "Permitir que o S3 publique no tópico"
+  type        = bool
+  default     = false
+}
+
+variable "source_bucket_arn" {
+  description = "ARN do bucket S3 que pode publicar"
+  type        = string
+  default     = ""
+}
