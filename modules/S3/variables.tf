@@ -77,3 +77,39 @@ variable "lifecycle_days" {
   default     = 30
 }
 
+variable "enable_notifications" {
+  description = "Habilita notificações do S3 para SNS ou SQS"
+  type        = bool
+  default     = false
+}
+
+variable "notification_topic_arn" {
+  description = "ARN do tópico SNS para enviar notificações (opcional)"
+  type        = string
+  default     = ""
+}
+
+variable "notification_queue_arn" {
+  description = "ARN da fila SQS para enviar notificações (opcional)"
+  type        = string
+  default     = ""
+}
+
+variable "notification_events" {
+  description = "Lista de eventos S3 que acionarão notificações"
+  type        = list(string)
+  default     = ["s3:ObjectCreated:*"]
+}
+
+variable "notification_filter_prefix" {
+  description = "Prefixo de filtro para objetos que acionarão notificações (ex: 'uploads/')"
+  type        = string
+  default     = ""
+}
+
+variable "notification_filter_suffix" {
+  description = "Sufixo de filtro para objetos que acionarão notificações (ex: '.json')"
+  type        = string
+  default     = ""
+}
+

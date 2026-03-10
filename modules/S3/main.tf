@@ -59,3 +59,93 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
+#---------------------------------------------------------------------------------------------#
+# Notificações S3 para SNS/SQS
+#---------------------------------------------------------------------------------------------#
+
+resource "aws_s3_bucket_notification" "this" {
+  count  = var.enable_notifications ? 1 : 0
+  bucket = aws_s3_bucket.this.id
+
+  dynamic "topic" {
+    for_each = var.notification_topic_arn != "" ? [1] : []
+    content {
+      topic_arn = var.notification_topic_arn
+      events    = var.notification_events
+      filter_prefix = var.notification_filter_prefix
+      filter_suffix = var.notification_filter_suffix
+    }
+  }
+
+  dynamic "queue" {
+    for_each = var.notification_queue_arn != "" ? [1] : []
+    content {
+      queue_arn = var.notification_queue_arn
+      events    = var.notification_events
+      filter_prefix = var.notification_filter_prefix
+      filter_suffix = var.notification_filter_suffix
+    }
+  }
+}
+
+#---------------------------------------------------------------------------------------------#
+# Política SNS para permitir que o S3 publique mensagens
+#---------------------------------------------------------------------------------------------#
+
+data "aws_iam_policy_document" "sns_topic_policy" {
+  count = var.enable_notifications && var.notification_topic_arn != "" ? 1 : 0
+
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    actions   = ["SNS:Publish"]
+    resources = [var.notification_topic_arn]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [aws_s3_bucket.this.arn]
+    }
+  }
+}
+
+resource "aws_sns_topic_policy" "s3_notification" {
+  count  = var.enable_notifications && var.notification_topic_arn != "" ? 1 : 0
+  arn    = var.notification_topic_arn
+  policy = data.aws_iam_policy_document.sns_topic_policy[0].json
+}
+
+#---------------------------------------------------------------------------------------------#
+# Política SQS para permitir que o S3 envie mensagens
+# Nota: A política SQS deve ser aplicada no módulo SQS, não aqui
+#---------------------------------------------------------------------------------------------#
+
+data "aws_iam_policy_document" "sqs_queue_policy" {
+  count = var.enable_notifications && var.notification_queue_arn != "" ? 1 : 0
+
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    actions   = ["sqs:SendMessage"]
+    resources = [var.notification_queue_arn]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [aws_s3_bucket.this.arn]
+    }
+  }
+}
+
+
+
