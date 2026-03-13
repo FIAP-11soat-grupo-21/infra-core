@@ -124,7 +124,7 @@ resource "aws_ecs_service" "service" {
   })
 
   lifecycle {
-    ignore_changes = var.enable_ecs_autoscaling ? [desired_count] : []
+    ignore_changes = [desired_count]
   }
 }
 

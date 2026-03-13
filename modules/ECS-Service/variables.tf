@@ -63,7 +63,7 @@ variable "ecs_desired_count" {
 
 variable "enable_ecs_autoscaling" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable ECS service autoscaling using target tracking policies for CPU and memory."
 }
 
