@@ -61,6 +61,63 @@ variable "ecs_desired_count" {
   default = 1
 }
 
+variable "enable_ecs_autoscaling" {
+  type        = bool
+  default     = false
+  description = "Enable ECS service autoscaling using target tracking policies for CPU and memory."
+}
+
+variable "ecs_autoscaling_min_capacity" {
+  type        = number
+  default     = 1
+  description = "Minimum number of tasks for ECS service autoscaling."
+}
+
+variable "ecs_autoscaling_max_capacity" {
+  type        = number
+  default     = 4
+  description = "Maximum number of tasks for ECS service autoscaling."
+
+  validation {
+    condition     = var.ecs_autoscaling_max_capacity >= var.ecs_autoscaling_min_capacity
+    error_message = "ecs_autoscaling_max_capacity must be greater than or equal to ecs_autoscaling_min_capacity."
+  }
+}
+
+variable "ecs_autoscaling_cpu_target" {
+  type        = number
+  default     = 70
+  description = "CPU utilization target percentage for ECS autoscaling policy."
+
+  validation {
+    condition     = var.ecs_autoscaling_cpu_target > 0 && var.ecs_autoscaling_cpu_target <= 100
+    error_message = "ecs_autoscaling_cpu_target must be between 1 and 100."
+  }
+}
+
+variable "ecs_autoscaling_memory_target" {
+  type        = number
+  default     = 75
+  description = "Memory utilization target percentage for ECS autoscaling policy."
+
+  validation {
+    condition     = var.ecs_autoscaling_memory_target > 0 && var.ecs_autoscaling_memory_target <= 100
+    error_message = "ecs_autoscaling_memory_target must be between 1 and 100."
+  }
+}
+
+variable "ecs_autoscaling_scale_in_cooldown" {
+  type        = number
+  default     = 60
+  description = "Cooldown in seconds after scale in actions."
+}
+
+variable "ecs_autoscaling_scale_out_cooldown" {
+  type        = number
+  default     = 60
+  description = "Cooldown in seconds after scale out actions."
+}
+
 variable "ecs_network_mode" {
   type    = string
   default = "awsvpc"

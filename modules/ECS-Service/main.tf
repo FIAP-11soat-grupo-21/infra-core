@@ -36,6 +36,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_attachments" {
 }
 
 locals {
+  ecs_cluster_name = length(split("/", var.cluster_id)) > 1 ? element(split("/", var.cluster_id), length(split("/", var.cluster_id)) - 1) : var.cluster_id
+
   ecs_environment = [for key, value in var.ecs_container_environment_variables : {
     name  = key
     value = value
@@ -120,6 +122,60 @@ resource "aws_ecs_service" "service" {
   tags = merge(var.project_common_tags, {
     Name = "${trimspace(var.ecs_service_name)}-ecs-service"
   })
+
+  lifecycle {
+    ignore_changes = var.enable_ecs_autoscaling ? [desired_count] : []
+  }
+}
+
+resource "aws_appautoscaling_target" "ecs_service" {
+  count = var.enable_ecs_autoscaling ? 1 : 0
+
+  max_capacity       = var.ecs_autoscaling_max_capacity
+  min_capacity       = var.ecs_autoscaling_min_capacity
+  resource_id        = "service/${local.ecs_cluster_name}/${aws_ecs_service.service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "ecs_cpu_target" {
+  count = var.enable_ecs_autoscaling ? 1 : 0
+
+  name               = "${var.ecs_service_name}-cpu-target-tracking"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_service[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_service[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_service[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = var.ecs_autoscaling_cpu_target
+    scale_in_cooldown  = var.ecs_autoscaling_scale_in_cooldown
+    scale_out_cooldown = var.ecs_autoscaling_scale_out_cooldown
+  }
+}
+
+resource "aws_appautoscaling_policy" "ecs_memory_target" {
+  count = var.enable_ecs_autoscaling ? 1 : 0
+
+  name               = "${var.ecs_service_name}-memory-target-tracking"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_service[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_service[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_service[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+
+    target_value       = var.ecs_autoscaling_memory_target
+    scale_in_cooldown  = var.ecs_autoscaling_scale_in_cooldown
+    scale_out_cooldown = var.ecs_autoscaling_scale_out_cooldown
+  }
 }
 
 resource "aws_security_group_rule" "allow_alb_to_ecs" {

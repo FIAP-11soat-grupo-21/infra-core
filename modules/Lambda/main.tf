@@ -69,12 +69,13 @@ resource "aws_lambda_layer_version" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  function_name = var.lambda_name
-  role          = aws_iam_role.lambda_exec.arn
-  handler       = var.handler
-  runtime       = var.runtime
-  timeout       = var.timeout
-  memory_size   = var.memory_size
+  function_name                  = var.lambda_name
+  role                           = aws_iam_role.lambda_exec.arn
+  handler                        = var.handler
+  runtime                        = var.runtime
+  timeout                        = var.timeout
+  memory_size                    = var.memory_size
+  reserved_concurrent_executions = var.lambda_reserved_concurrent_executions
 
   s3_bucket = var.s3_bucket
   s3_key    = var.s3_key
@@ -92,6 +93,14 @@ resource "aws_lambda_function" "this" {
 
   tags    = var.tags
   publish = true
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "this" {
+  count = var.lambda_provisioned_concurrent_executions != null ? 1 : 0
+
+  function_name                     = aws_lambda_function.this.function_name
+  qualifier                         = aws_lambda_function.this.version
+  provisioned_concurrent_executions = var.lambda_provisioned_concurrent_executions
 }
 
 resource "aws_security_group" "lambda_sg" {

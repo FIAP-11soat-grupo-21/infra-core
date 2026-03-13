@@ -23,6 +23,8 @@ module "lambda" {
   layer_enabled = false
   timeout = 30
   memory_size = 256
+  lambda_reserved_concurrent_executions    = 20
+  lambda_provisioned_concurrent_executions = 5
   role_permissions = {}
   api_id = module.api_gateway.api_id
 }
@@ -48,9 +50,10 @@ Inputs (variáveis)
 | `layer_license_info` | string | `""` | Informação de licença do layer. |
 | `s3_bucket` | string | `""` | Bucket S3 contendo o package da Lambda (opcional). |
 | `s3_key` | string | `""` | Key do objeto zip no S3. |
-| `s3_object_version` | string | `""` | Versão do objeto S3 (opcional). |
 | `timeout` | number | `30` | Timeout da função em segundos. |
 | `memory_size` | number | `256` | Memória da função em MB. |
+| `lambda_reserved_concurrent_executions` | number | `null` | Limite de concorrência reservada da função (opcional). |
+| `lambda_provisioned_concurrent_executions` | number | `null` | Concorrência provisionada para a versão publicada (opcional). |
 | `role_permissions` | map(object) | `{}` | Mapa de permissões para anexar à role da Lambda. |
 | `api_id` | string | n/a | API Gateway v2 API id (se for integrar). |
 | `payload_format_version` | string | `2.0` | Versão do payload para integração com API Gateway v2. |

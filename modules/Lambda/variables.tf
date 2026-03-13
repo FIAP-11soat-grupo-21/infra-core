@@ -106,6 +106,28 @@ variable "memory_size" {
   default = 256
 }
 
+variable "lambda_reserved_concurrent_executions" {
+  type        = number
+  default     = null
+  description = "(Optional) Reserved concurrency limit for the Lambda function."
+}
+
+variable "lambda_provisioned_concurrent_executions" {
+  type        = number
+  default     = null
+  description = "(Optional) Provisioned concurrency for the published Lambda version."
+
+  validation {
+    condition     = var.lambda_provisioned_concurrent_executions == null || var.lambda_provisioned_concurrent_executions >= 1
+    error_message = "lambda_provisioned_concurrent_executions must be null or greater than or equal to 1."
+  }
+
+  validation {
+    condition     = var.lambda_provisioned_concurrent_executions == null || var.lambda_reserved_concurrent_executions == null || var.lambda_provisioned_concurrent_executions <= var.lambda_reserved_concurrent_executions
+    error_message = "lambda_provisioned_concurrent_executions must be less than or equal to lambda_reserved_concurrent_executions when reserved concurrency is set."
+  }
+}
+
 variable "role_permissions" {
   description = <<-EOT
 Mapa de permissões a serem adicionadas à role da Lambda. A chave é um identificador (ex.: 'dynamodb', 's3', 'custom'), o valor é um objeto com 'actions' (lista de strings), 'resources' (lista de strings) e opcionalmente 'effect' (string, default 'Allow'). Exemplo:

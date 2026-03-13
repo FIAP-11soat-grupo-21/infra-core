@@ -27,6 +27,14 @@ module "ecs_service" {
   ecs_desired_count             = 2
   ecs_service_name              = "my-app-service"
 
+  enable_ecs_autoscaling        = true
+  ecs_autoscaling_min_capacity  = 2
+  ecs_autoscaling_max_capacity  = 6
+  ecs_autoscaling_cpu_target    = 70
+  ecs_autoscaling_memory_target = 75
+  ecs_autoscaling_scale_in_cooldown  = 60
+  ecs_autoscaling_scale_out_cooldown = 60
+
   alb_target_group_arn          = module.alb.target_group_arn
   alb_security_group_id         = module.alb.alb_security_group_id
 }
@@ -50,6 +58,13 @@ Inputs (variáveis)
 | `ecs_container_environment_variables` | map(string) | `{}` | Variáveis de ambiente para o container. |
 | `ecs_container_secrets` | map(string) | `{}` | Mapeamento de secrets do Secrets Manager para injetar no container. |
 | `ecs_desired_count` | number | `1` | Desired count do serviço. |
+| `enable_ecs_autoscaling` | bool | `false` | Habilita autoscaling do serviço ECS (target tracking em CPU e memória). |
+| `ecs_autoscaling_min_capacity` | number | `1` | Capacidade mínima de tasks quando o autoscaling está habilitado. |
+| `ecs_autoscaling_max_capacity` | number | `4` | Capacidade máxima de tasks quando o autoscaling está habilitado. |
+| `ecs_autoscaling_cpu_target` | number | `70` | Alvo de utilização média de CPU (%) para escala automática. |
+| `ecs_autoscaling_memory_target` | number | `75` | Alvo de utilização média de memória (%) para escala automática. |
+| `ecs_autoscaling_scale_in_cooldown` | number | `60` | Cooldown (segundos) após redução de capacidade. |
+| `ecs_autoscaling_scale_out_cooldown` | number | `60` | Cooldown (segundos) após aumento de capacidade. |
 | `ecs_network_mode` | string | `awsvpc` | Network mode para a task. |
 | `ecs_task_cpu` | string | `256` | CPU units para a task. |
 | `ecs_task_memory` | string | `512` | Memória para a task. |
