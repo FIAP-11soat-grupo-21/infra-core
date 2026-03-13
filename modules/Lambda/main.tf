@@ -101,6 +101,13 @@ resource "aws_lambda_provisioned_concurrency_config" "this" {
   function_name                     = aws_lambda_function.this.function_name
   qualifier                         = aws_lambda_function.this.version
   provisioned_concurrent_executions = var.lambda_provisioned_concurrent_executions
+
+  lifecycle {
+    precondition {
+      condition     = var.lambda_reserved_concurrent_executions == null || var.lambda_provisioned_concurrent_executions <= var.lambda_reserved_concurrent_executions
+      error_message = "lambda_provisioned_concurrent_executions must be less than or equal to lambda_reserved_concurrent_executions when reserved concurrency is set."
+    }
+  }
 }
 
 resource "aws_security_group" "lambda_sg" {

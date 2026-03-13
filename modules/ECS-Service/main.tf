@@ -136,6 +136,13 @@ resource "aws_appautoscaling_target" "ecs_service" {
   resource_id        = "service/${local.ecs_cluster_name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
+
+  lifecycle {
+    precondition {
+      condition     = var.ecs_autoscaling_max_capacity >= var.ecs_autoscaling_min_capacity
+      error_message = "ecs_autoscaling_max_capacity must be greater than or equal to ecs_autoscaling_min_capacity."
+    }
+  }
 }
 
 resource "aws_appautoscaling_policy" "ecs_cpu_target" {

@@ -121,11 +121,6 @@ variable "lambda_provisioned_concurrent_executions" {
     condition     = var.lambda_provisioned_concurrent_executions == null || var.lambda_provisioned_concurrent_executions >= 1
     error_message = "lambda_provisioned_concurrent_executions must be null or greater than or equal to 1."
   }
-
-  validation {
-    condition     = var.lambda_provisioned_concurrent_executions == null || var.lambda_reserved_concurrent_executions == null || var.lambda_provisioned_concurrent_executions <= var.lambda_reserved_concurrent_executions
-    error_message = "lambda_provisioned_concurrent_executions must be less than or equal to lambda_reserved_concurrent_executions when reserved concurrency is set."
-  }
 }
 
 variable "role_permissions" {

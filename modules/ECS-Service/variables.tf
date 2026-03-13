@@ -77,11 +77,6 @@ variable "ecs_autoscaling_max_capacity" {
   type        = number
   default     = 4
   description = "Maximum number of tasks for ECS service autoscaling."
-
-  validation {
-    condition     = var.ecs_autoscaling_max_capacity >= var.ecs_autoscaling_min_capacity
-    error_message = "ecs_autoscaling_max_capacity must be greater than or equal to ecs_autoscaling_min_capacity."
-  }
 }
 
 variable "ecs_autoscaling_cpu_target" {
