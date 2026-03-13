@@ -131,15 +131,15 @@ resource "aws_ecs_service" "service" {
 resource "aws_appautoscaling_target" "ecs_service" {
   count = var.enable_ecs_autoscaling ? 1 : 0
 
-  max_capacity       = var.ecs_autoscaling_max_capacity
-  min_capacity       = var.ecs_autoscaling_min_capacity
+  max_capacity       = coalesce(var.ecs_autoscaling_max_capacity, 4)
+  min_capacity       = coalesce(var.ecs_autoscaling_min_capacity, 1)
   resource_id        = "service/${local.ecs_cluster_name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 
   lifecycle {
     precondition {
-      condition     = var.ecs_autoscaling_max_capacity >= var.ecs_autoscaling_min_capacity
+      condition     = coalesce(var.ecs_autoscaling_max_capacity, 4) >= coalesce(var.ecs_autoscaling_min_capacity, 1)
       error_message = "ecs_autoscaling_max_capacity must be greater than or equal to ecs_autoscaling_min_capacity."
     }
   }
@@ -159,9 +159,9 @@ resource "aws_appautoscaling_policy" "ecs_cpu_target" {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
 
-    target_value       = var.ecs_autoscaling_cpu_target
-    scale_in_cooldown  = var.ecs_autoscaling_scale_in_cooldown
-    scale_out_cooldown = var.ecs_autoscaling_scale_out_cooldown
+    target_value       = coalesce(var.ecs_autoscaling_cpu_target, 70)
+    scale_in_cooldown  = coalesce(var.ecs_autoscaling_scale_in_cooldown, 60)
+    scale_out_cooldown = coalesce(var.ecs_autoscaling_scale_out_cooldown, 60)
   }
 }
 
@@ -179,9 +179,9 @@ resource "aws_appautoscaling_policy" "ecs_memory_target" {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
 
-    target_value       = var.ecs_autoscaling_memory_target
-    scale_in_cooldown  = var.ecs_autoscaling_scale_in_cooldown
-    scale_out_cooldown = var.ecs_autoscaling_scale_out_cooldown
+    target_value       = coalesce(var.ecs_autoscaling_memory_target, 75)
+    scale_in_cooldown  = coalesce(var.ecs_autoscaling_scale_in_cooldown, 60)
+    scale_out_cooldown = coalesce(var.ecs_autoscaling_scale_out_cooldown, 60)
   }
 }
 

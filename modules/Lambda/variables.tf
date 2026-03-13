@@ -118,7 +118,7 @@ variable "lambda_provisioned_concurrent_executions" {
   description = "(Optional) Provisioned concurrency for the published Lambda version."
 
   validation {
-    condition     = var.lambda_provisioned_concurrent_executions == null || var.lambda_provisioned_concurrent_executions >= 1
+    condition     = var.lambda_provisioned_concurrent_executions == null ? true : var.lambda_provisioned_concurrent_executions >= 1
     error_message = "lambda_provisioned_concurrent_executions must be null or greater than or equal to 1."
   }
 }

@@ -85,7 +85,7 @@ variable "ecs_autoscaling_cpu_target" {
   description = "CPU utilization target percentage for ECS autoscaling policy."
 
   validation {
-    condition     = var.ecs_autoscaling_cpu_target > 0 && var.ecs_autoscaling_cpu_target <= 100
+    condition     = var.ecs_autoscaling_cpu_target == null ? true : (var.ecs_autoscaling_cpu_target > 0 && var.ecs_autoscaling_cpu_target <= 100)
     error_message = "ecs_autoscaling_cpu_target must be between 1 and 100."
   }
 }
@@ -96,7 +96,7 @@ variable "ecs_autoscaling_memory_target" {
   description = "Memory utilization target percentage for ECS autoscaling policy."
 
   validation {
-    condition     = var.ecs_autoscaling_memory_target > 0 && var.ecs_autoscaling_memory_target <= 100
+    condition     = var.ecs_autoscaling_memory_target == null ? true : (var.ecs_autoscaling_memory_target > 0 && var.ecs_autoscaling_memory_target <= 100)
     error_message = "ecs_autoscaling_memory_target must be between 1 and 100."
   }
 }
